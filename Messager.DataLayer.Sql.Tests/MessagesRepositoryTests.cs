@@ -7,6 +7,7 @@ using Messager.DataLayer;
 using Messager.DataLayer.Sql;
 using Messager.Model;
 
+
 namespace Messager.DataLayer.Sql.Tests
 {
     [TestClass]
@@ -17,6 +18,7 @@ namespace Messager.DataLayer.Sql.Tests
         private List<Guid> _tmpMessages = new List<Guid>();
         private List<Guid> _tmpChats = new List<Guid>();
         private List<Guid> _tmpUsers = new List<Guid>();
+        private List<ChatsRepositoryTests.ChatIdMemberId> _tempChatIdMemberIds = new List<ChatsRepositoryTests.ChatIdMemberId>();
 
         private List<User> Users;
         private Message Message;
@@ -50,23 +52,31 @@ namespace Messager.DataLayer.Sql.Tests
             };
 
             var usersRepository = new UsersRepository(ConnectionString);
-            var createdUser1 = usersRepository.CreateUser(user1);
-            var createdUser2 = usersRepository.CreateUser(user2);
-            var createdUser3 = usersRepository.CreateUser(user3);
 
-            Users = new List<User>{ createdUser1, createdUser2, createdUser3 };
-            _tmpUsers.AddRange(new[] { createdUser1.Id, createdUser2.Id, createdUser3.Id });
+            Users = new List<User>
+            {
+                usersRepository.CreateUser(user1),
+                usersRepository.CreateUser(user2),
+                usersRepository.CreateUser(user3)
+            };
+            _tmpUsers.AddRange(Users.Select(u => u.Id));
 
             Chat = new Chat
             {
                 Name = "ChatName",
-                Creater = createdUser1,
+                Creater = Users[0],
                 Members = Users
             };
 
             var chatRepository = new ChatsRepository(ConnectionString, usersRepository);
             Chat = chatRepository.CreateChat(Chat);
             _tmpChats.Add(Chat.Id);
+            foreach (var m in Chat.Members)
+                _tempChatIdMemberIds.Add(new ChatsRepositoryTests.ChatIdMemberId
+                {
+                    ChatId = Chat.Id,
+                    MemberId = m.Id
+                });
 
             var attachments = new List<byte[]>
             {
@@ -76,12 +86,12 @@ namespace Messager.DataLayer.Sql.Tests
 
             Message = new Message
             {
-                User = createdUser1,
-                Attachments = attachments,
+                User = Users[0],
                 Chat = Chat,
                 Date = DateTime.Now.ToUniversalTime(),
                 IsSelfDestructing = false,
-                Text = "Hello Tester, How are you?"
+                Text = "Hello Tester, How are you?",
+                Attachments = attachments
             };
         }
 
@@ -105,6 +115,40 @@ namespace Messager.DataLayer.Sql.Tests
         }
 
         [TestMethod]
+        public void ShouldGetMessage()
+        {
+            //arrange
+            var usersRepository = new UsersRepository(ConnectionString);
+            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
+            var createdMessage = messagesRepository.CreateMessage(Message);
+            _tmpMessages.Add(createdMessage.Id);
+
+            //act
+            var gottenMessage = messagesRepository.GetMessage(createdMessage.Id);
+
+            //assert
+            Assert.AreEqual(createdMessage.Text, gottenMessage.Text);
+            Assert.AreEqual(createdMessage.IsSelfDestructing, gottenMessage.IsSelfDestructing);
+            Assert.AreEqual(createdMessage.Date.ToString(), gottenMessage.Date.ToString());
+            if (createdMessage.Attachments.ElementAt(0).Length == 
+                    gottenMessage.Attachments.ElementAt(0).Length)
+            {
+                Assert.IsTrue(createdMessage.Attachments.ElementAt(0).
+                      SequenceEqual(gottenMessage.Attachments.ElementAt(0)));
+                Assert.IsTrue(createdMessage.Attachments.ElementAt(1).
+                      SequenceEqual(gottenMessage.Attachments.ElementAt(1)));
+            }
+            else
+            {
+                Assert.IsTrue(createdMessage.Attachments.ElementAt(0).
+                        SequenceEqual(gottenMessage.Attachments.ElementAt(1)));
+                Assert.IsTrue(createdMessage.Attachments.ElementAt(1).
+                        SequenceEqual(gottenMessage.Attachments.ElementAt(0)));
+            }
+        }
+
+        [TestMethod]
         public void ShouldDeleteMessage()
         {
             //arrange
@@ -124,17 +168,20 @@ namespace Messager.DataLayer.Sql.Tests
         public void Clean()
         {
             var usersRepository = new UsersRepository(ConnectionString);
-            foreach (var userId in _tmpUsers)
-                usersRepository.DeleteUser(userId);
-
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
-            foreach (var chatId in _tmpChats)
-                chatsRepository.DeleteChat(chatId);
-
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository,chatsRepository);
+
+            foreach (var cm in _tempChatIdMemberIds)
+                chatsRepository.DeleteMember(cm.ChatId, cm.MemberId);
+
             foreach (var messageId in _tmpMessages)
                 messagesRepository.DeleteMessage(messageId);
 
+            foreach (var chatId in _tmpChats)
+                chatsRepository.DeleteChat(chatId);
+
+            foreach (var userId in _tmpUsers)
+                usersRepository.DeleteUser(userId);
         }
     }
 }

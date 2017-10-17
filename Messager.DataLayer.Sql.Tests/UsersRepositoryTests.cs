@@ -15,11 +15,13 @@ namespace Messager.DataLayer.Sql.Tests
 
         private readonly List<Guid> _tempUsers = new List<Guid>();
 
-        [TestMethod]
-        public void ShouldCreateUser()
+        private User userWithoutPhoto;
+        private User userWithPhoto;
+
+        [TestInitialize]
+        public void Initialize()
         {
-            //arrange
-            var user1 = new User
+            userWithoutPhoto = new User
             {
                 FirstName = "Thomas",
                 LastName = "Anderson",
@@ -27,12 +29,11 @@ namespace Messager.DataLayer.Sql.Tests
                 Password = "123123123"
             };
 
-
             var photo = Properties.Photos.AgentSmithPhoto;
             ImageConverter converter = new ImageConverter();
             var photoBytes = (byte[])converter.ConvertTo(photo, typeof(byte[]));
 
-            var user2 = new User
+            userWithPhoto = new User
             {
                 FirstName = "Smith",
                 LastName = "Smith",
@@ -40,181 +41,116 @@ namespace Messager.DataLayer.Sql.Tests
                 Password = "123123123",
                 ProfilePhoto = photoBytes
             };
+        }
+
+        [TestMethod]
+        public void ShouldCreateUser()
+        {
+            //arrange
+            var repository = new UsersRepository(ConnectionString);
 
             //act
-            var repository = new UsersRepository(ConnectionString);
-            var createdUser1 = repository.CreateUser(user1);
-            var createdUser2 = repository.CreateUser(user2);
-
-            _tempUsers.AddRange(new[] { createdUser1.Id, createdUser2.Id });
+            var createdUWithoutPhoto = repository.CreateUser(userWithoutPhoto);
+            var createdUWithPhoto = repository.CreateUser(userWithPhoto);
+            _tempUsers.AddRange(new[] { createdUWithoutPhoto.Id, createdUWithPhoto.Id });
 
             //Asserts
-            Assert.AreEqual(user1.FirstName, createdUser1.FirstName);
-            Assert.AreEqual(user1.LastName, createdUser1.LastName);
-            Assert.AreEqual(user1.Login, createdUser1.Login);
-            Assert.AreEqual(user1.Password, createdUser1.Password);
+            Assert.AreEqual(userWithoutPhoto.FirstName, createdUWithoutPhoto.FirstName);
+            Assert.AreEqual(userWithoutPhoto.LastName, createdUWithoutPhoto.LastName);
+            Assert.AreEqual(userWithoutPhoto.Login, createdUWithoutPhoto.Login);
+            Assert.AreEqual(userWithoutPhoto.Password, createdUWithoutPhoto.Password);
 
 
-            Assert.AreEqual(user2.FirstName, createdUser2.FirstName);
-            Assert.AreEqual(user2.LastName, createdUser2.LastName);
-            Assert.AreEqual(user2.Login, createdUser2.Login);
-            Assert.AreEqual(user2.Password, createdUser2.Password);
-            Assert.IsTrue(Enumerable.SequenceEqual(user2.ProfilePhoto, createdUser2.ProfilePhoto));
+            Assert.AreEqual(userWithPhoto.FirstName, createdUWithPhoto.FirstName);
+            Assert.AreEqual(userWithPhoto.LastName, createdUWithPhoto.LastName);
+            Assert.AreEqual(userWithPhoto.Login, createdUWithPhoto.Login);
+            Assert.AreEqual(userWithPhoto.Password, createdUWithPhoto.Password);
+            Assert.IsTrue(Enumerable.SequenceEqual(userWithPhoto.ProfilePhoto, createdUWithPhoto.ProfilePhoto));
         }
 
         [TestMethod]
         public void ShouldDeleteUser()
         {
             //arrange
-            var user = new User
-            {
-                FirstName = "Thomas",
-                LastName = "Anderson",
-                Login = "Neo1",
-                Password = "123123123"
-            };
             var repository = new UsersRepository(ConnectionString);
-            var result = repository.CreateUser(user);
+            var createdUser = repository.CreateUser(userWithoutPhoto);
 
             //act
-            repository.DeleteUser(result.Id);
+            repository.DeleteUser(createdUser.Id);
 
             //Asserts
-            Assert.ThrowsException<ArgumentException>(() => repository.GetUser(result.Id));
+            Assert.ThrowsException<ArgumentException>(() => repository.GetUser(createdUser.Id));
         }
 
         [TestMethod]
         public void ShouldGetUserById()
         {
             //arrange
-            var photo = Properties.Photos.AgentSmithPhoto;
-            ImageConverter converter = new ImageConverter();
-            var photoBytes = (byte[])converter.ConvertTo(photo, typeof(byte[]));
-
-            var user = new User
-            {
-                FirstName = "Smith",
-                LastName = "Smith",
-                Login = "Agent Smith",
-                Password = "123123123",
-                ProfilePhoto = photoBytes
-            };
-
-            var userWithoutPhoto = new User
-            {
-                FirstName = "Smith",
-                LastName = "Smith",
-                Login = "Agent Smith2",
-                Password = "123123123",
-                ProfilePhoto = null
-            };
-
             var repository = new UsersRepository(ConnectionString);
-            var createdUser = repository.CreateUser(user);
-            var createdUserWithoutPhoto = repository.CreateUser(userWithoutPhoto);
+            var createdUWithPhoto = repository.CreateUser(userWithPhoto);
+            var createdUWithoutPhoto = repository.CreateUser(userWithoutPhoto);
 
-            _tempUsers.AddRange(new[] { createdUser.Id, createdUserWithoutPhoto.Id });
+            _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
 
             //act
-            var gottenUser = repository.GetUser(createdUser.Id);
-            var gottenUserWithoutPhoto = repository.GetUser(createdUserWithoutPhoto.Id);
+            var gottenUWithPhoto = repository.GetUser(createdUWithPhoto.Id);
+            var gottenUWithoutPhoto = repository.GetUser(createdUWithoutPhoto.Id);
 
             //Asserts
-            Assert.AreEqual(createdUser.Id, gottenUser.Id);
-            Assert.AreEqual(createdUser.FirstName, gottenUser.FirstName);
-            Assert.AreEqual(createdUser.LastName, gottenUser.LastName);
-            Assert.AreEqual(createdUser.Login, gottenUser.Login);
-            Assert.AreEqual(createdUser.Password, gottenUser.Password);
-            Assert.IsTrue(createdUser.ProfilePhoto.SequenceEqual(gottenUser.ProfilePhoto));
+            Assert.AreEqual(createdUWithPhoto.Id, gottenUWithPhoto.Id);
+            Assert.AreEqual(createdUWithPhoto.FirstName, gottenUWithPhoto.FirstName);
+            Assert.AreEqual(createdUWithPhoto.LastName, gottenUWithPhoto.LastName);
+            Assert.AreEqual(createdUWithPhoto.Login, gottenUWithPhoto.Login);
+            Assert.AreEqual(createdUWithPhoto.Password, gottenUWithPhoto.Password);
+            Assert.IsTrue(createdUWithPhoto.ProfilePhoto.SequenceEqual(gottenUWithPhoto.ProfilePhoto));
 
-            Assert.AreEqual(createdUserWithoutPhoto.Id, gottenUserWithoutPhoto.Id);
-            Assert.AreEqual(createdUserWithoutPhoto.FirstName, gottenUserWithoutPhoto.FirstName);
-            Assert.AreEqual(createdUserWithoutPhoto.LastName, gottenUserWithoutPhoto.LastName);
-            Assert.AreEqual(createdUserWithoutPhoto.Login, gottenUserWithoutPhoto.Login);
-            Assert.AreEqual(createdUserWithoutPhoto.Password, gottenUserWithoutPhoto.Password);
-            Assert.AreEqual(createdUserWithoutPhoto.ProfilePhoto, gottenUserWithoutPhoto.ProfilePhoto);
+            Assert.AreEqual(createdUWithoutPhoto.Id, gottenUWithoutPhoto.Id);
+            Assert.AreEqual(createdUWithoutPhoto.FirstName, gottenUWithoutPhoto.FirstName);
+            Assert.AreEqual(createdUWithoutPhoto.LastName, gottenUWithoutPhoto.LastName);
+            Assert.AreEqual(createdUWithoutPhoto.Login, gottenUWithoutPhoto.Login);
+            Assert.AreEqual(createdUWithoutPhoto.Password, gottenUWithoutPhoto.Password);
+            Assert.IsNull(gottenUWithoutPhoto.ProfilePhoto);
         }
 
         [TestMethod]
         public void ShouldGetUserByLogin()
         {
             //arrange
-            var photo = Properties.Photos.AgentSmithPhoto;
-            ImageConverter converter = new ImageConverter();
-            var photoBytes = (byte[])converter.ConvertTo(photo, typeof(byte[]));
-
-            var user = new User
-            {
-                FirstName = "Smith",
-                LastName = "Smith",
-                Login = "Agent Smith",
-                Password = "123123123",
-                ProfilePhoto = photoBytes
-            };
-
-            var userWithoutPhoto = new User
-            {
-                FirstName = "Smith",
-                LastName = "Smith",
-                Login = "Agent Smith2",
-                Password = "123123123",
-                ProfilePhoto = null
-            };
-
             var repository = new UsersRepository(ConnectionString);
-            var createdUser = repository.CreateUser(user);
-            var createdUserWithoutPhoto = repository.CreateUser(userWithoutPhoto);
-            _tempUsers.AddRange(new[] { createdUser.Id, createdUserWithoutPhoto.Id });
+            var createdUWithPhoto = repository.CreateUser(userWithPhoto);
+            var createdUWithoutPhoto = repository.CreateUser(userWithoutPhoto);
+            _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
 
             //act
-            var gottenUser = repository.GetUser(createdUser.Login);
-            var gottenUserWithoutPhoto = repository.GetUser(createdUserWithoutPhoto.Login);
+            var gottenUWithPhoto = repository.GetUser(createdUWithPhoto.Login);
+            var gottenUWithoutPhoto = repository.GetUser(createdUWithoutPhoto.Login);
 
             //Asserts
-            Assert.AreEqual(createdUser.Id, gottenUser.Id);
-            Assert.AreEqual(createdUser.FirstName, gottenUser.FirstName);
-            Assert.AreEqual(createdUser.LastName, gottenUser.LastName);
-            Assert.AreEqual(createdUser.Login, gottenUser.Login);
-            Assert.AreEqual(createdUser.Password, gottenUser.Password);
-            Assert.IsTrue(createdUser.ProfilePhoto.SequenceEqual(gottenUser.ProfilePhoto));
+            Assert.AreEqual(createdUWithPhoto.Id, gottenUWithPhoto.Id);
+            Assert.AreEqual(createdUWithPhoto.FirstName, gottenUWithPhoto.FirstName);
+            Assert.AreEqual(createdUWithPhoto.LastName, gottenUWithPhoto.LastName);
+            Assert.AreEqual(createdUWithPhoto.Login, gottenUWithPhoto.Login);
+            Assert.AreEqual(createdUWithPhoto.Password, gottenUWithPhoto.Password);
+            Assert.IsTrue(createdUWithPhoto.ProfilePhoto.SequenceEqual(gottenUWithPhoto.ProfilePhoto));
 
-            Assert.AreEqual(createdUserWithoutPhoto.Id, gottenUserWithoutPhoto.Id);
-            Assert.AreEqual(createdUserWithoutPhoto.FirstName, gottenUserWithoutPhoto.FirstName);
-            Assert.AreEqual(createdUserWithoutPhoto.LastName, gottenUserWithoutPhoto.LastName);
-            Assert.AreEqual(createdUserWithoutPhoto.Login, gottenUserWithoutPhoto.Login);
-            Assert.AreEqual(createdUserWithoutPhoto.Password, gottenUserWithoutPhoto.Password);
-            Assert.AreEqual(createdUserWithoutPhoto.ProfilePhoto, gottenUserWithoutPhoto.ProfilePhoto);
+            Assert.AreEqual(createdUWithoutPhoto.Id, gottenUWithoutPhoto.Id);
+            Assert.AreEqual(createdUWithoutPhoto.FirstName, gottenUWithoutPhoto.FirstName);
+            Assert.AreEqual(createdUWithoutPhoto.LastName, gottenUWithoutPhoto.LastName);
+            Assert.AreEqual(createdUWithoutPhoto.Login, gottenUWithoutPhoto.Login);
+            Assert.AreEqual(createdUWithoutPhoto.Password, gottenUWithoutPhoto.Password);
+            Assert.AreEqual(createdUWithoutPhoto.ProfilePhoto, gottenUWithoutPhoto.ProfilePhoto);
         }
 
         [TestMethod]
         public void ShouldUpdateUser()
         {
             //arrange
-            var user = new User
-            {
-                FirstName = "Thomas",
-                LastName = "Anderson",
-                Login = "Neo2",
-                Password = "123123123"
-            };
-
             var repository = new UsersRepository(ConnectionString);
-            user = repository.CreateUser(user);
-            _tempUsers.Add(user.Id);
+            var createdUser = repository.CreateUser(userWithoutPhoto);
+            _tempUsers.Add(createdUser.Id);
 
-            var photo = Properties.Photos.AgentSmithPhoto;
-            ImageConverter converter = new ImageConverter();
-            var photoBytes = (byte[])converter.ConvertTo(photo, typeof(byte[]));
-
-            var newUserData = new User
-            {
-                Id = user.Id,
-                FirstName = "Neo",
-                LastName = "Neo",
-                Login = "NewNeo",
-                Password = "321321321",
-                ProfilePhoto = photoBytes
-            };
+            var newUserData = userWithPhoto;
+            newUserData.Id = createdUser.Id;
 
             //act
             repository.UpdateUser(newUserData);

@@ -35,8 +35,6 @@ namespace Messager.DataLayer.Sql
         }
 
 
-        //AddUser does not work. Cause is 'implicit conversion from nvarchar to varbinary(max)' 
-        //I dunno why byte array does not convert to varbinary or binary.
         public User CreateUser(User user)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -46,27 +44,16 @@ namespace Messager.DataLayer.Sql
                 {
                     user.Id = Guid.NewGuid();
                     user.Password = HashSHA1(user.Password);
+                    
+                    command.CommandText = "AddUser";
+                    command.CommandType = CommandType.StoredProcedure;
                     if (user.ProfilePhoto != null)
-                    {
-                        //command.CommandText = "EXECUTE AddUser @FirstName, @LastName, @Photo, @Login, @PasswordHash";
-                        command.CommandText = "INSERT INTO Users(Id, FirstName, LastName, Photo, Login, PasswordHash)" +
-                                "VALUES(@Id, @FirstName, @LastName, @Photo, @Login, @PasswordHash)";
                         command.Parameters.AddWithValue("@Photo", user.ProfilePhoto);
-                    }
-                    else
-                    {
-                        //command.CommandText = "EXECUTE AddUser @FirstName, @LastName, @Login, @PasswordHash";
-                        command.CommandText = "INSERT INTO Users(Id, FirstName, LastName, Login, PasswordHash)" +
-                              "VALUES(@Id, @FirstName, @LastName, @Login, @PasswordHash)";
-                    }
-                    command.Parameters.AddWithValue("@Id", user.Id);
                     command.Parameters.AddWithValue("@FirstName", user.FirstName);
                     command.Parameters.AddWithValue("@LastName", user.LastName);
                     command.Parameters.AddWithValue("@Login", user.Login);
                     command.Parameters.AddWithValue("@PasswordHash", user.Password);
-
-                    //user.Id = (Guid)command.ExecuteScalar();
-                    command.ExecuteNonQuery();
+                    user.Id = (Guid)command.ExecuteScalar();
                     return user;
                 }
             }
@@ -79,7 +66,8 @@ namespace Messager.DataLayer.Sql
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "DELETE FROM Users WHERE Id = @Id";
+                    command.CommandText = "DeleteUser";
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Id", userId);
                     command.ExecuteNonQuery();
                 }
@@ -94,7 +82,8 @@ namespace Messager.DataLayer.Sql
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "EXECUTE GetUserByLogin @Login";
+                    command.CommandText = "GetUserByLogin";
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Login", login);
                     using (var reader = command.ExecuteReader())
                     {
@@ -122,7 +111,8 @@ namespace Messager.DataLayer.Sql
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "EXECUTE GetUserById @Id";
+                    command.CommandText = "GetUserById";
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Id", userId);
                     using (var reader = command.ExecuteReader())
                     {
@@ -151,25 +141,20 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     var oldPassword = GetUser(user.Id).Password;
+                    command.CommandText = "UpdateUser";
+                    command.CommandType = CommandType.StoredProcedure;
 
                     if (user.ProfilePhoto != null)
-                    {
-                        command.CommandText = "UPDATE Users SET FirstName = @FirstName, LastName = @LastName," +
-                        "Photo = @Photo, Login = @Login, PasswordHash = @PasswordHash WHERE Id = @Id";
-                        //command.CommandText = "UpdateUser @Id, @FirstName, @LastName, @Photo, @Login, @PasswordHash";
                         command.Parameters.AddWithValue("@Photo", user.ProfilePhoto);
-                    }
-                    else
-                        //command.CommandText = "UpdateUser @Id, @FirstName, @LastName, @Login, @PasswordHash";
-                        command.CommandText = "UPDATE Users SET FirstName = @FirstName, LastName = @LastName," +
-                        "Login = @Login, PasswordHash = @PasswordHash WHERE Id = @Id";
-
+                    
                     command.Parameters.AddWithValue("@Id", user.Id);
                     command.Parameters.AddWithValue("@FirstName", user.FirstName);
                     command.Parameters.AddWithValue("@LastName", user.LastName);
                     command.Parameters.AddWithValue("@Login", user.Login);
+
                     if (user.Password != oldPassword)
                         user.Password = HashSHA1(user.Password);
+
                     command.Parameters.AddWithValue("@PasswordHash", user.Password);
 
                     command.ExecuteNonQuery();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
@@ -28,38 +29,37 @@ namespace Messager.DataLayer.Sql
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                message.Id = Guid.NewGuid();
                 using (var transaction = connection.BeginTransaction())
                 {
                     using (var command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
-                        command.CommandText = "INSERT INTO Messages(Id, ChatId, Text, Date, IsSelfDestructing, UserId)" +
-                            "VALUES(@Id, @ChatId, @Text, @Date, @IsSelfDestructing, @UserId)";
-                        command.Parameters.AddWithValue("@Id", message.Id);
+                        command.CommandText = "AddMessage";
+                        command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@ChatId", message.Chat.Id);
                         command.Parameters.AddWithValue("@UserId", message.User.Id);
                         command.Parameters.AddWithValue("@Date", message.Date);
                         command.Parameters.AddWithValue("@Text", message.Text);
                         command.Parameters.AddWithValue("@IsSelfDestructing", message.IsSelfDestructing);
 
-                        command.ExecuteNonQuery();
+                        message.Id = (Guid)command.ExecuteScalar();
                     }
 
-                    foreach (var attachment in message.Attachments)
-                    {
-                        using (var command = connection.CreateCommand())
+                    if (message.Attachments != null)
+                        foreach (var attachment in message.Attachments)
                         {
-                            command.Transaction = transaction;
-                            command.CommandText = "INSERT INTO Files VALUES(@FileId, @File);" +
-                                "INSERT INTO Attachments(FileId, MessageId) VALUES(@FileId, @MessageId)";
-                            command.Parameters.AddWithValue("@MessageId", message.Id);
-                            command.Parameters.AddWithValue("@FileId", Guid.NewGuid());
-                            command.Parameters.AddWithValue("@File", attachment);
+                            using (var command = connection.CreateCommand())
+                            {
+                                command.Transaction = transaction;
+                                command.CommandText = "AddAttachment";
+                                command.CommandType = CommandType.StoredProcedure;
+                                command.Parameters.AddWithValue("@MessageId", message.Id);
+                                command.Parameters.AddWithValue("@File", attachment);
 
-                            command.ExecuteNonQuery();
+                                command.ExecuteNonQuery();
+                            }
                         }
-                    }
+
                     transaction.Commit();
                     return message;
                 }
@@ -87,14 +87,15 @@ namespace Messager.DataLayer.Sql
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT * FROM Messages JOIN Attachments ON Messages.Id = Attachments.MessageId " +
-                        "JOIN Files ON Attachments.FileId = Files.Id WHERE Messages.Id = @Id";
-                    command.Parameters.AddWithValue("@Id", messageId);
+                    command.CommandText = "GetMessage";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@MessageId", messageId);
                     var reader = command.ExecuteReader();
                     if (!reader.HasRows)
                         throw new ArgumentException($"Message with Id: {messageId} has not been found");
                     else
                     {
+                        reader.Read();
                         var message = new Message
                         {
                             Id = reader.GetGuid(reader.GetOrdinal("Id")),
@@ -102,16 +103,18 @@ namespace Messager.DataLayer.Sql
                             IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
                             Text = reader.GetString(reader.GetOrdinal("Text")),
                             Chat = _chatsRepository.GetChatInfo(reader.GetGuid(reader.GetOrdinal("ChatId"))),
-                            User = _usersRepository.GetUser(reader.GetGuid(reader.GetOrdinal("UserId")))
+                            User = _usersRepository.GetUser(reader.GetGuid(reader.GetOrdinal("UserId"))),
                         };
 
-                        message.Attachments.Add(reader["File"] == DBNull.Value ?
-                                                null : reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                        message.Attachments = reader["File"] == DBNull.Value ?
+                            null : new List<byte[]> { reader.GetSqlBinary(reader.GetOrdinal("File")).Value};
+
                         while (reader.Read())
                         {
-                            message.Attachments.Add(reader["File"] == DBNull.Value ?
-                                                    null : reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                            if(reader["File"] != DBNull.Value)
+                                message.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                         }
+
                         return message;
                     }
                 }

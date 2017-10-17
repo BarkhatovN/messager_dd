@@ -21,19 +21,18 @@ namespace Messager.DataLayer.Sql
             _usersRepository = usersRepository;
         }
 
-        public void AddMember(Guid userId, Guid chatId)
+        public void AddMember(Guid chatId, Guid userId)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using(var command = connection.CreateCommand())
+                using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO ChatParticipants(ChatId, UserId, Date, IsAddition)" +
-                        "VALUES(ChatId = @ChatId, UserId = @UserId, Date = @Date, IsAddition = @IsAddition";
+                    command.CommandText = "AddMember";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.Parameters.AddWithValue("@Date", DateTime.Now.ToUniversalTime());
-                    command.Parameters.AddWithValue("@IsAddition", true);
 
                     command.ExecuteNonQuery();
                 }
@@ -42,18 +41,18 @@ namespace Messager.DataLayer.Sql
 
         public Chat CreateChat(Chat chat)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using(var transaction = connection.BeginTransaction())
+                using (var transaction = connection.BeginTransaction())
                 {
                     chat.Id = Guid.NewGuid();
 
                     using (var command = connection.CreateCommand())
                     {
                         command.Transaction = transaction;
-                        command.CommandText = "INSERT INTO Chats(Id, Name, CreaterId)" +
-                            "VALUES(@Id, @Name, @CreaterId)";
+                        command.CommandText = "AddChat";
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@Id", chat.Id);
                         command.Parameters.AddWithValue("@Name", chat.Name);
                         command.Parameters.AddWithValue("@CreaterId", chat.Creater.Id);
@@ -65,17 +64,13 @@ namespace Messager.DataLayer.Sql
                     if (chat.Members.Count() < 2)
                         throw new ArgumentException($"In chat with Id {chat.Id} count of members less then 2 ({chat.Members.Count()})");
 
+                    var userRepository = new UsersRepository(_connectionString);
                     foreach (var userId in chat.Members.Select(user => user.Id))
                     {
                         using (var command = connection.CreateCommand())
                         {
                             command.Transaction = transaction;
-                            command.CommandText = "INSERT INTO ChatParticipants(Id, ChatId, UserId, Date)" +
-                                "VALUES(NEWID(), @ChatId, @UserId, @Date)";
-                            command.Parameters.AddWithValue("@ChatId", chat.Id);
-                            command.Parameters.AddWithValue("@UserId", userId);
-                            command.Parameters.AddWithValue("@Date", date);
-                            command.ExecuteNonQuery();
+                            AddMember(chat.Id, userId);
                         }
                     }
                     transaction.Commit();
@@ -87,34 +82,35 @@ namespace Messager.DataLayer.Sql
 
         public void DeleteChat(Guid chatId)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using(var command = connection.CreateCommand())
+                using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "DELETE FROM Chats WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Id", chatId);
+                    command.CommandText = "DeleteChat";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@ChatId", chatId);
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public void DeleteMember(Guid userId, Guid chatId)
+        public void DeleteMember(Guid chatId, Guid userId)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using(var command = connection.CreateCommand())
+                using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "DELETE FROM ChartParticipants" +
-                        "WHERE ChatId = @ChatId, UserId = @UserId";
+                    command.CommandText = "DeleteMember";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.ExecuteNonQuery();
                 }
             }
         }
-        
+
         /// <summary>
         /// Get returns Chat {Id, Creater, Name}.
         /// </summary>
@@ -122,13 +118,14 @@ namespace Messager.DataLayer.Sql
         /// <returns></returns>
         public Chat GetChatInfo(Guid chatId)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT * FROM Chats WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Id", chatId);
+                    command.CommandText = "GetChatInfo";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@ChatId", chatId);
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -161,14 +158,15 @@ namespace Messager.DataLayer.Sql
 
         public IEnumerable<User> GetMembers(Guid chatId)
         {
-            using(var connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using(var command = connection.CreateCommand())
+                using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT UserId FROM ChatParticipants WHERE ChatId = @ChatId";
+                    command.CommandText = "GetMembers";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
-                    using(var reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -190,7 +188,8 @@ namespace Messager.DataLayer.Sql
                 ICollection<Message> messages = new List<Message>();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "EXECUTE GetMessagesFromChatForUserWithAttachment(@UserId,@ChatId)";
+                    command.CommandText = "GetMessagesForUser";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.Parameters.AddWithValue("@ChatId", chatId);
 
@@ -198,6 +197,7 @@ namespace Messager.DataLayer.Sql
                     {
                         Message prevMessage = null;
                         Guid prevId = Guid.NewGuid();
+                        var result = new List<Message>();
                         while (reader.Read())
                         {
                             var message = new Message
@@ -212,22 +212,26 @@ namespace Messager.DataLayer.Sql
 
                             if (prevId != message.Id)
                             {
-                                message.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                                message.Attachments = (reader["File"] == DBNull.Value ?
+                                    null : new List<byte[]> { reader.GetSqlBinary(reader.GetOrdinal("File")).Value });
+
                                 if (prevMessage != null)
                                 {
-                                    yield return prevMessage;
+                                    result.Add(prevMessage);
                                 }
-                                else
-                                {
-                                    prevMessage = message;
-                                    prevId = message.Id;
-                                }
+                                prevMessage = message;
+                                prevId = message.Id;
+
                             }
                             else
                             {
                                 prevMessage.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                             }
                         }
+                        if (prevMessage == null)
+                            return null;
+                        result.Add(prevMessage);
+                        return result;
                     }
                 }
             }
@@ -238,15 +242,13 @@ namespace Messager.DataLayer.Sql
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
+                var usersRepository = new UsersRepository(_connectionString);
+                var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
+                var user = _usersRepository.GetUser(userId);
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText =
-                        "SELECT Messages.Id AS Id, ChatId, Text, Date, IsSelfDestructing, UserId, 'File' " +
-                        "FROM (SELECT * FROM Messages WHERE UserId = @UserId AND CONTAINS(Text, @Text)) AS Result " +
-                        "JOIN Attachments ON Messages.Id = Attachments.MessageId " +
-                        "JOIN Files ON Attachments.FileId = Files.Id " +
-                        "WHERE Messages.Date > (SELECT ChatParticipants.Date FROM ChatParticipants " +
-                        "WHERE Result.UserId = ChatParticipants.UserId AND Result.ChatId = ChatParticipants.ChatId)";
+                    command.CommandText = "SearchMessagesByPhrase";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.Parameters.AddWithValue("@Text", phrase);
 
@@ -254,6 +256,7 @@ namespace Messager.DataLayer.Sql
                     {
                         Message prevMessage = null;
                         Guid prevId = Guid.NewGuid();
+                        var result = new List<Message>();
                         while (reader.Read())
                         {
                             var message = new Message
@@ -262,33 +265,37 @@ namespace Messager.DataLayer.Sql
                                 Date = reader.GetDateTime(reader.GetOrdinal("Date")),
                                 IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
                                 Text = reader.GetString(reader.GetOrdinal("Text")),
-                                Chat = GetChat(reader.GetGuid(reader.GetOrdinal("ChatId")),userId),
-                                User = _usersRepository.GetUser(userId),
+                                Chat = chatsRepository.GetChatInfo(reader.GetGuid(reader.GetOrdinal("ChatId"))),
+                                User = user
                             };
 
                             if (prevId != message.Id)
                             {
-                                message.Attachments.Add(reader["File"] == DBNull.Value ?
-                                                        null : reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                                message.Attachments = (reader["File"] == DBNull.Value ?
+                                    null : new List<byte[]> { reader.GetSqlBinary(reader.GetOrdinal("File")).Value });
+
                                 if (prevMessage != null)
                                 {
-                                    yield return prevMessage;
+                                    result.Add(prevMessage);
                                 }
-                                else
-                                {
-                                    prevMessage = message;
-                                    prevId = message.Id;
-                                }
+                                prevMessage = message;
+                                prevId = message.Id;
+
                             }
                             else
                             {
                                 prevMessage.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                             }
                         }
+                        if (prevMessage == null)
+                            return null;
+                        result.Add(prevMessage);
+                        return result;
+
                     }
                 }
-            }
 
+            }
         }
     }
 }
