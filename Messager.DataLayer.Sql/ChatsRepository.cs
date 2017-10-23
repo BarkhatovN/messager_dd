@@ -14,11 +14,13 @@ namespace Messager.DataLayer.Sql
     {
         private readonly string _connectionString;
         private readonly IUsersRepository _usersRepository;
+        private readonly IMessagesRepository _messagesRepository;
 
         public ChatsRepository(string connectionString, IUsersRepository usersRepository)
         {
             _connectionString = connectionString;
             _usersRepository = usersRepository;
+            _messagesRepository = new MessagesRepository(connectionString, usersRepository, this);
         }
 
         public void AddMember(Guid chatId, Guid userId)
@@ -152,7 +154,7 @@ namespace Messager.DataLayer.Sql
                 Name = info.Name,
                 Creater = info.Creater,
                 Members = GetMembers(chatId),
-                Messages = GetMessagesForUser(chatId, userId)
+                Messages = _messagesRepository.GetMessagesForUser(chatId, userId)
             };
         }
 
@@ -178,65 +180,7 @@ namespace Messager.DataLayer.Sql
 
         }
 
-        public IEnumerable<Message> GetMessagesForUser(Guid chatId, Guid userId)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                var user = _usersRepository.GetUser(userId);
-                var chat = GetChatInfo(chatId);
-                connection.Open();
-                ICollection<Message> messages = new List<Message>();
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "GetMessagesForUser";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@UserId", userId);
-                    command.Parameters.AddWithValue("@ChatId", chatId);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        Message prevMessage = null;
-                        Guid prevId = Guid.NewGuid();
-                        var result = new List<Message>();
-                        while (reader.Read())
-                        {
-                            var message = new Message
-                            {
-                                Id = reader.GetGuid(reader.GetOrdinal("Id")),
-                                Date = reader.GetDateTime(reader.GetOrdinal("Date")),
-                                IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
-                                Text = reader.GetString(reader.GetOrdinal("Text")),
-                                Chat = chat,
-                                User = user,
-                            };
-
-                            if (prevId != message.Id)
-                            {
-                                message.Attachments = (reader["File"] == DBNull.Value ?
-                                    null : new List<byte[]> { reader.GetSqlBinary(reader.GetOrdinal("File")).Value });
-
-                                if (prevMessage != null)
-                                {
-                                    result.Add(prevMessage);
-                                }
-                                prevMessage = message;
-                                prevId = message.Id;
-
-                            }
-                            else
-                            {
-                                prevMessage.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
-                            }
-                        }
-                        if (prevMessage == null)
-                            return null;
-                        result.Add(prevMessage);
-                        return result;
-                    }
-                }
-            }
-        }
-
+        
         public IEnumerable<Message> SearchMessagesByPhraseForUser(Guid userId, String phrase)
         {
             using (var connection = new SqlConnection(_connectionString))

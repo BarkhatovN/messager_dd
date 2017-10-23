@@ -9,13 +9,13 @@ namespace Messager.DataLayer
 {
     public interface IChatsRepository
     {
+        Chat GetChat(Guid id, Guid userId);
         Chat GetChatInfo(Guid ChatId);
         Chat CreateChat(Chat chat);
         IEnumerable<User> GetMembers(Guid chatId);
         void DeleteChat(Guid chatId);
         void AddMember(Guid chatId, Guid userId);
         void DeleteMember(Guid userId, Guid chatId);
-        IEnumerable<Message> GetMessagesForUser(Guid chatId, Guid messageId);
         IEnumerable<Message> SearchMessagesByPhraseForUser(Guid userId, String phrase);
     }
 }

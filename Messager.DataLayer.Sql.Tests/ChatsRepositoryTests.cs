@@ -236,7 +236,7 @@ namespace Messager.DataLayer.Sql.Tests
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
             
             //act
-            var messagesOfUser = chatsRepository.GetMessagesForUser(Chat.Id, Messages[0].User.Id);
+            var messagesOfUser = messagesRepository.GetMessagesForUser(Chat.Id, Messages[0].User.Id);
 
             //assert
             Assert.IsNotNull(messagesOfUser);

@@ -114,11 +114,76 @@ namespace Messager.DataLayer.Sql
                             if(reader["File"] != DBNull.Value)
                                 message.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                         }
+                        
 
                         return message;
                     }
                 }
             }
         }
+
+
+        public IEnumerable<Message> GetMessagesForUser(Guid chatId, Guid userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var user = _usersRepository.GetUser(userId);
+                var chat = _chatsRepository.GetChatInfo(chatId);
+                connection.Open();
+                ICollection<Message> messages = new List<Message>();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "GetMessagesForUser";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserId", userId);
+                    command.Parameters.AddWithValue("@ChatId", chatId);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        Message prevMessage = null;
+                        Guid prevId = Guid.NewGuid();
+                        var result = new List<Message>();
+                        while (reader.Read())
+                        {
+                            var message = new Message
+                            {
+                                Id = reader.GetGuid(reader.GetOrdinal("Id")),
+                                Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                                IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
+                                Text = reader.GetString(reader.GetOrdinal("Text")),
+                                Chat = chat,
+                                User = user,
+                            };
+
+                            if (prevId != message.Id)
+                            {
+                                message.Attachments = (reader["File"] == DBNull.Value ?
+                                    null : new List<byte[]> { reader.GetSqlBinary(reader.GetOrdinal("File")).Value });
+
+                                if (prevMessage != null)
+                                {
+                                    result.Add(prevMessage);
+                                }
+                                prevMessage = message;
+                                prevId = message.Id;
+
+                            }
+                            else
+                            {
+                                prevMessage.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                            }
+                        }
+                        if (prevMessage == null)
+                            return null;
+
+                        result.Add(prevMessage);
+
+                        result.FindAll(m => m.IsSelfDestructing && m.User.Id == userId).ForEach((m) => DeleteMessage(m.Id));
+                        return result;
+                    }
+                }
+            }
+        }
+
     }
 }
