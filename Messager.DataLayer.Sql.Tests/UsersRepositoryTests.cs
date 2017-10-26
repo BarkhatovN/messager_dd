@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Text;
 using System.Drawing;
 using Messager.Model;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace Messager.DataLayer.Sql.Tests
         private readonly List<Guid> _tempUsers = new List<Guid>();
 
         private User _userWithoutPhoto;
-        private User userWithPhoto;
+        private User _userWithPhoto;
 
         [TestInitialize]
         public void Initialize()
@@ -33,7 +32,7 @@ namespace Messager.DataLayer.Sql.Tests
             ImageConverter converter = new ImageConverter();
             var photoBytes = (byte[])converter.ConvertTo(photo, typeof(byte[]));
 
-            userWithPhoto = new User
+            _userWithPhoto = new User
             {
                 FirstName = "Smith",
                 LastName = "Smith",
@@ -51,7 +50,7 @@ namespace Messager.DataLayer.Sql.Tests
 
             //act
             var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
-            var createdUWithPhoto = repository.CreateUser(userWithPhoto);
+            var createdUWithPhoto = repository.CreateUser(_userWithPhoto);
             _tempUsers.AddRange(new[] { createdUWithoutPhoto.Id, createdUWithPhoto.Id });
 
             //Asserts
@@ -61,11 +60,11 @@ namespace Messager.DataLayer.Sql.Tests
             Assert.AreEqual(_userWithoutPhoto.Password, createdUWithoutPhoto.Password);
 
 
-            Assert.AreEqual(userWithPhoto.FirstName, createdUWithPhoto.FirstName);
-            Assert.AreEqual(userWithPhoto.LastName, createdUWithPhoto.LastName);
-            Assert.AreEqual(userWithPhoto.Login, createdUWithPhoto.Login);
-            Assert.AreEqual(userWithPhoto.Password, createdUWithPhoto.Password);
-            Assert.IsTrue(Enumerable.SequenceEqual(userWithPhoto.ProfilePhoto, createdUWithPhoto.ProfilePhoto));
+            Assert.AreEqual(_userWithPhoto.FirstName, createdUWithPhoto.FirstName);
+            Assert.AreEqual(_userWithPhoto.LastName, createdUWithPhoto.LastName);
+            Assert.AreEqual(_userWithPhoto.Login, createdUWithPhoto.Login);
+            Assert.AreEqual(_userWithPhoto.Password, createdUWithPhoto.Password);
+            Assert.IsTrue(_userWithPhoto.ProfilePhoto.SequenceEqual(createdUWithPhoto.ProfilePhoto));
         }
 
         [TestMethod]
@@ -87,7 +86,7 @@ namespace Messager.DataLayer.Sql.Tests
         {
             //arrange
             var repository = new UsersRepository(ConnectionString);
-            var createdUWithPhoto = repository.CreateUser(userWithPhoto);
+            var createdUWithPhoto = repository.CreateUser(_userWithPhoto);
             var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
 
             _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
@@ -117,7 +116,7 @@ namespace Messager.DataLayer.Sql.Tests
         {
             //arrange
             var repository = new UsersRepository(ConnectionString);
-            var createdUWithPhoto = repository.CreateUser(userWithPhoto);
+            var createdUWithPhoto = repository.CreateUser(_userWithPhoto);
             var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
             _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
 
@@ -149,7 +148,7 @@ namespace Messager.DataLayer.Sql.Tests
             var createdUser = repository.CreateUser(_userWithoutPhoto);
             _tempUsers.Add(createdUser.Id);
 
-            var newUserData = userWithPhoto;
+            var newUserData = _userWithPhoto;
             newUserData.Id = createdUser.Id;
 
             //act
