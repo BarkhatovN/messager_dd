@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Data;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 using Messager.Model;
-using Messager.DataLayer;
 
 namespace Messager.DataLayer.Sql
 {
     public class MessagesRepository : IMessagesRepository
     {
 
-        private readonly String _connectionString;
-        private IUsersRepository _usersRepository;
-        private IChatsRepository _chatsRepository;
+        private readonly string _connectionString;
+        private readonly IUsersRepository _usersRepository;
+        private readonly IChatsRepository _chatsRepository;
 
         public MessagesRepository(String connectionString, IUsersRepository usersRepository, IChatsRepository chatsRepository)
         {
@@ -93,35 +89,32 @@ namespace Messager.DataLayer.Sql
                     var reader = command.ExecuteReader();
                     if (!reader.HasRows)
                         throw new ArgumentException($"Message with Id: {messageId} has not been found");
-                    else
+
+                    reader.Read();
+                    var message = new Message
                     {
-                        reader.Read();
-                        var message = new Message
-                        {
-                            Id = reader.GetGuid(reader.GetOrdinal("Id")),
-                            Date = reader.GetDateTime(reader.GetOrdinal("Date")),
-                            IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
-                            Text = reader.GetString(reader.GetOrdinal("Text")),
-                            Chat = _chatsRepository.GetChatInfo(reader.GetGuid(reader.GetOrdinal("ChatId"))),
-                            User = _usersRepository.GetUser(reader.GetGuid(reader.GetOrdinal("UserId"))),
-                        };
+                        Id = reader.GetGuid(reader.GetOrdinal("Id")),
+                        Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                        IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
+                        Text = reader.GetString(reader.GetOrdinal("Text")),
+                        Chat = _chatsRepository.GetChatInfo(reader.GetGuid(reader.GetOrdinal("ChatId"))),
+                        User = _usersRepository.GetUser(reader.GetGuid(reader.GetOrdinal("UserId"))),
+                        Attachments =
+                            reader["File"] == DBNull.Value
+                                ? null
+                                : new List<byte[]> {reader.GetSqlBinary(reader.GetOrdinal("File")).Value}
+                    };
 
-                        message.Attachments = reader["File"] == DBNull.Value ?
-                            null : new List<byte[]> { reader.GetSqlBinary(reader.GetOrdinal("File")).Value};
-
-                        while (reader.Read())
-                        {
-                            if(reader["File"] != DBNull.Value)
-                                message.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
-                        }
-                        
-
-                        return message;
+                    while (reader.Read())
+                    {
+                        if(reader["File"] != DBNull.Value)
+                            message.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                     }
+
+                    return message;
                 }
             }
         }
-
 
         public IEnumerable<Message> GetMessagesForUser(Guid chatId, Guid userId)
         {
@@ -134,14 +127,14 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "GetMessagesForUser";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.Parameters.AddWithValue("@ChatId", chatId);
 
                     using (var reader = command.ExecuteReader())
                     {
                         Message prevMessage = null;
-                        Guid prevId = Guid.NewGuid();
+                        var prevId = Guid.NewGuid();
                         var result = new List<Message>();
                         while (reader.Read())
                         {
@@ -152,7 +145,7 @@ namespace Messager.DataLayer.Sql
                                 IsSelfDestructing = reader.GetBoolean(reader.GetOrdinal("IsSelfDestructing")),
                                 Text = reader.GetString(reader.GetOrdinal("Text")),
                                 Chat = chat,
-                                User = user,
+                                User = user
                             };
 
                             if (prevId != message.Id)
@@ -178,7 +171,8 @@ namespace Messager.DataLayer.Sql
 
                         result.Add(prevMessage);
 
-                        result.FindAll(m => m.IsSelfDestructing && m.User.Id == userId).ForEach((m) => DeleteMessage(m.Id));
+                        result.FindAll(m => m.IsSelfDestructing && m.User.Id == userId).ForEach(m => DeleteMessage(m.Id));
+
                         return result;
                     }
                 }

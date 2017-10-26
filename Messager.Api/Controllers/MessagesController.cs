@@ -1,13 +1,10 @@
-﻿using Messager.DataLayer;
+﻿using System;
+using System.Linq;
+using System.Web.Http;
+using Messager.Api.Properties;
+using Messager.DataLayer;
 using Messager.DataLayer.Sql;
 using Messager.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-
 
 namespace Messager.Api.Controllers
 {
@@ -16,7 +13,7 @@ namespace Messager.Api.Controllers
         private readonly IUsersRepository _usersRepository;
         private readonly IChatsRepository _chatsRepository;
         private readonly IMessagesRepository _messagesRepository;
-        private readonly String ConnectionString = Properties.Settings.Default.ConnectionString;
+        private readonly String ConnectionString = Settings.Default.ConnectionString;
 
         public MessagesController()
         {

@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
-using Messager.Model;
 using System.Linq;
+using Messager.DataLayer.Sql.Tests.Properties;
+using Messager.Model;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Messager.DataLayer.Sql.Tests
 {
     [TestClass]
     public class UsersRepositoryTests
     {
-        private const string ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
+        private readonly string _connectionString = Settings.Default.ConnectionString;
 
         private readonly List<Guid> _tempUsers = new List<Guid>();
 
@@ -28,7 +29,7 @@ namespace Messager.DataLayer.Sql.Tests
                 Password = "123123123"
             };
 
-            var photo = Properties.Photos.AgentSmithPhoto;
+            var photo = Photos.AgentSmithPhoto;
             ImageConverter converter = new ImageConverter();
             var photoBytes = (byte[])converter.ConvertTo(photo, typeof(byte[]));
 
@@ -46,7 +47,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldCreateUser()
         {
             //arrange
-            var repository = new UsersRepository(ConnectionString);
+            var repository = new UsersRepository(_connectionString);
 
             //act
             var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
@@ -71,7 +72,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldDeleteUser()
         {
             //arrange
-            var repository = new UsersRepository(ConnectionString);
+            var repository = new UsersRepository(_connectionString);
             var createdUser = repository.CreateUser(_userWithoutPhoto);
 
             //act
@@ -85,7 +86,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldGetUserById()
         {
             //arrange
-            var repository = new UsersRepository(ConnectionString);
+            var repository = new UsersRepository(_connectionString);
             var createdUWithPhoto = repository.CreateUser(_userWithPhoto);
             var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
 
@@ -115,7 +116,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldGetUserByLogin()
         {
             //arrange
-            var repository = new UsersRepository(ConnectionString);
+            var repository = new UsersRepository(_connectionString);
             var createdUWithPhoto = repository.CreateUser(_userWithPhoto);
             var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
             _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
@@ -144,7 +145,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldUpdateUser()
         {
             //arrange
-            var repository = new UsersRepository(ConnectionString);
+            var repository = new UsersRepository(_connectionString);
             var createdUser = repository.CreateUser(_userWithoutPhoto);
             _tempUsers.Add(createdUser.Id);
 
@@ -172,7 +173,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void Clean()
         {
             foreach (var id in _tempUsers)
-                new UsersRepository(ConnectionString).DeleteUser(id);
+                new UsersRepository(_connectionString).DeleteUser(id);
         }
         
 

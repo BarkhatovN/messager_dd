@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Messager.DataLayer.Sql;
-using Messager.Model;
-using Messager.DataLayer;
 using System.Text;
+using Messager.DataLayer.Sql.Tests.Properties;
+using Messager.Model;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Messager.DataLayer.Sql.Tests
 {
@@ -14,7 +13,7 @@ namespace Messager.DataLayer.Sql.Tests
     {
         public struct ChatIdMemberId { public Guid ChatId; public Guid MemberId; }
 
-        private readonly String ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
+        private readonly string _connectionString = Settings.Default.ConnectionString;
 
         private readonly List<Guid> _tempChatIds = new List<Guid>();
         private readonly List<Guid> _tempUserIds = new List<Guid>();
@@ -41,7 +40,7 @@ namespace Messager.DataLayer.Sql.Tests
                 FirstName = "Smith",
                 LastName = "Smith",
                 Login = "Agent Smith",
-                Password = "123123123",
+                Password = "123123123"
             };
 
             var user3 = new User
@@ -49,10 +48,10 @@ namespace Messager.DataLayer.Sql.Tests
                 FirstName = "Noname",
                 LastName = "Noname",
                 Login = "Trinity",
-                Password = "123123123",
+                Password = "123123123"
             };
 
-            var usersRepository = new UsersRepository(ConnectionString);
+            var usersRepository = new UsersRepository(_connectionString);
             _users = new List<User>
             {
                 usersRepository.CreateUser(user1),
@@ -68,7 +67,7 @@ namespace Messager.DataLayer.Sql.Tests
                 Name = "ChatName"
             };
 
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
             _chat = chatsRepository.CreateChat(chat);
             _tempChatIds.Add(_chat.Id);
             _tempChatIdMemberIds.AddRange(new[]
@@ -100,7 +99,7 @@ namespace Messager.DataLayer.Sql.Tests
                 User = _users[0]
             };
 
-            var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
+            var messagesRepository = new MessagesRepository(_connectionString, usersRepository, chatsRepository);
             _messages = new List<Message> 
             {
                 messagesRepository.CreateMessage(message1),
@@ -114,8 +113,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldAddMember()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             chatRepository.AddMember(_chat.Id, _users[2].Id);
@@ -130,8 +129,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldDeleteMember()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             chatRepository.DeleteMember(_chat.Id, _users[1].Id);
@@ -146,7 +145,7 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldCreateChat()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
+            var usersRepository = new UsersRepository(_connectionString);
 
             var chatWithOneMember = new Chat
             {
@@ -170,7 +169,7 @@ namespace Messager.DataLayer.Sql.Tests
             };
 
             //act
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
             var createdChatWithTwoMembers = chatsRepository.CreateChat(chatWithTwoMembers);
             var createdChatWithThreeMembers = chatsRepository.CreateChat(chatWithThreeMembers);
             _tempChatIds.AddRange(new[] { createdChatWithTwoMembers.Id, createdChatWithThreeMembers.Id });
@@ -199,8 +198,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldDeleteChat()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             chatsRepository.DeleteChat(_chat.Id);
@@ -214,8 +213,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldGetChatInfo()
             {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             var gottenChat = chatsRepository.GetChatInfo(_chat.Id);
@@ -230,9 +229,9 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldGetMessagesForUser()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
-            var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
+            var messagesRepository = new MessagesRepository(_connectionString, usersRepository, chatsRepository);
             
             //act
             var messagesOfUser = messagesRepository.GetMessagesForUser(_chat.Id, _messages[0].User.Id);
@@ -246,8 +245,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldGetMembers()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             var members = chatsRepository.GetMembers(_chat.Id);
@@ -260,8 +259,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldGetChat()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             var gottenChat = chatsRepository.GetChat(_chat.Id, _chat.Creater.Id);
@@ -278,8 +277,8 @@ namespace Messager.DataLayer.Sql.Tests
         public void ShouldFindMessagesByPhrase()
         {
             //arrange
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
 
             //act
             var messages = chatsRepository.SearchMessagesByPhraseForUser(_chat.Creater.Id, "Message");
@@ -292,9 +291,9 @@ namespace Messager.DataLayer.Sql.Tests
         [TestCleanup]
         public void Clean()
         {
-            var usersRepository = new UsersRepository(ConnectionString);
-            var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
-            var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
+            var usersRepository = new UsersRepository(_connectionString);
+            var chatsRepository = new ChatsRepository(_connectionString, usersRepository);
+            var messagesRepository = new MessagesRepository(_connectionString, usersRepository, chatsRepository);
 
             foreach (var cm in _tempChatIdMemberIds)
                 chatsRepository.DeleteMember(cm.ChatId, cm.MemberId);

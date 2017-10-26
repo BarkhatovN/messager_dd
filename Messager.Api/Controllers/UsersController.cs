@@ -1,37 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
-
-using Messager.Model;
+using Messager.Api.Properties;
 using Messager.DataLayer;
 using Messager.DataLayer.Sql;
+using Messager.Model;
+using NLog;
+
 
 namespace Messager.Api.Controllers
 {
     public class UsersController : ApiController
     {
+
+        private ILogger logger;
         private readonly IUsersRepository _usersRepository;
-        private readonly String ConnectionString = Properties.Settings.Default.ConnectionString;
+        private readonly string _connectionString = Settings.Default.ConnectionString;
 
         public UsersController()
         {
-            _usersRepository = new UsersRepository(ConnectionString);
+            _usersRepository = new UsersRepository(_connectionString);
         }
 
         [HttpGet]
         [Route("api/users/{id}")]
         public User GetById(Guid id)
         {
-            return _usersRepository.GetUser(id);
+            logger.Info($"{DateTime.Now.ToShortDateString()} Был получен запрос на пользователь с Id: {id}");
+            try
+            {
+                return _usersRepository.GetUser(id);
+            }
         }
 
         [HttpGet]
         [Route("api/users/{Login}")]
         public User GetByLogin(string login)
         {
+            logger.Info($"{DateTime.Now.ToShortDateString()} Пользователь с Id: {login} был выдан");
             return _usersRepository.GetUser(login);
         }
 
@@ -47,7 +52,6 @@ namespace Messager.Api.Controllers
         public void Update([FromBody] User user)
         {
             _usersRepository.UpdateUser(user);
-            return;
         }
 
         [HttpDelete]

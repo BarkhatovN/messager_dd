@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data;
 using System.Data.SqlClient;
-
+using System.Linq;
 using Messager.Model;
-using Messager.DataLayer;
 
 namespace Messager.DataLayer.Sql
 {
@@ -31,7 +28,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "AddMember";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.Parameters.AddWithValue("@Date", DateTime.Now.ToUniversalTime());
@@ -54,19 +51,16 @@ namespace Messager.DataLayer.Sql
                     {
                         command.Transaction = transaction;
                         command.CommandText = "AddChat";
-                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@Id", chat.Id);
                         command.Parameters.AddWithValue("@Name", chat.Name);
                         command.Parameters.AddWithValue("@CreaterId", chat.Creater.Id);
                         command.ExecuteNonQuery();
                     }
 
-                    DateTime date = DateTime.Now.ToUniversalTime();
-
                     if (chat.Members.Count() < 2)
                         throw new ArgumentException($"In chat with Id {chat.Id} count of members less then 2 ({chat.Members.Count()})");
 
-                    var userRepository = new UsersRepository(_connectionString);
                     foreach (var userId in chat.Members.Select(user => user.Id))
                     {
                         using (var command = connection.CreateCommand())
@@ -90,7 +84,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "DeleteChat";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
                     command.ExecuteNonQuery();
                 }
@@ -105,7 +99,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "DeleteMember";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.ExecuteNonQuery();
@@ -116,7 +110,10 @@ namespace Messager.DataLayer.Sql
         /// <summary>
         /// Get returns Chat {Id, Creater, Name}.
         /// </summary>
-        /// <param name="ChatId"></param>
+        /// <param>
+        ///     <name>ChatId</name>
+        /// </param>
+        /// <param name="chatId"></param>
         /// <returns></returns>
         public Chat GetChatInfo(Guid chatId)
         {
@@ -126,7 +123,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "GetChatInfo";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
 
                     using (var reader = command.ExecuteReader())
@@ -166,7 +163,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "GetMembers";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ChatId", chatId);
                     using (var reader = command.ExecuteReader())
                     {
@@ -192,7 +189,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "SearchMessagesByPhrase";
-                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserId", userId);
                     command.Parameters.AddWithValue("@Text", phrase);
 
@@ -228,7 +225,7 @@ namespace Messager.DataLayer.Sql
                             }
                             else
                             {
-                                prevMessage.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                                prevMessage?.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                             }
                         }
                         if (prevMessage == null)

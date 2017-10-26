@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
+using System.Security.Cryptography;
+using System.Text;
 using Messager.Model;
-using Messager.DataLayer;
-
 
 namespace Messager.DataLayer.Sql
 {
@@ -20,16 +16,16 @@ namespace Messager.DataLayer.Sql
             _connectionString = connectionString;
         }
 
-        public static string HashSHA1(string password)
+        public static string HashSha1(string password)
         {
-            var sha1 = System.Security.Cryptography.SHA1.Create();
+            var sha1 = SHA1.Create();
             var inputBytes = Encoding.ASCII.GetBytes(password);
             var hash = sha1.ComputeHash(inputBytes);
 
             var sb = new StringBuilder();
-            for (var i = 0; i < hash.Length; i++)
+            foreach (var t in hash)
             {
-                sb.Append(hash[i].ToString("X2"));
+                sb.Append(t.ToString("X2"));
             }
             return sb.ToString();
         }
@@ -43,7 +39,7 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     user.Id = Guid.NewGuid();
-                    user.Password = HashSHA1(user.Password);
+                    user.Password = HashSha1(user.Password);
                     
                     command.CommandText = "AddUser";
                     command.CommandType = CommandType.StoredProcedure;
@@ -74,7 +70,7 @@ namespace Messager.DataLayer.Sql
             }
         }
 
-        public User GetUser(String login)
+        public User GetUser(string login)
         {
             var encoding = new UTF8Encoding();
             using (var connection = new SqlConnection(_connectionString))
@@ -126,7 +122,7 @@ namespace Messager.DataLayer.Sql
                             Login = reader.GetString(reader.GetOrdinal("Login")),
                             ProfilePhoto = reader["Photo"] == DBNull.Value ?
                                 null : reader.GetSqlBinary(reader.GetOrdinal("Photo")).Value,
-                            Password = reader.GetString(reader.GetOrdinal("PasswordHash")),
+                            Password = reader.GetString(reader.GetOrdinal("PasswordHash"))
                         };
                     }
                 }
@@ -153,7 +149,7 @@ namespace Messager.DataLayer.Sql
                     command.Parameters.AddWithValue("@Login", user.Login);
 
                     if (user.Password != oldPassword)
-                        user.Password = HashSHA1(user.Password);
+                        user.Password = HashSha1(user.Password);
 
                     command.Parameters.AddWithValue("@PasswordHash", user.Password);
 

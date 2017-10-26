@@ -1,9 +1,10 @@
-﻿using Messager.DataLayer;
-using Messager.DataLayer.Sql;
-using Messager.Model;
-using System;
+﻿using System;
 using System.Linq;
 using System.Web.Http;
+using Messager.Api.Properties;
+using Messager.DataLayer;
+using Messager.DataLayer.Sql;
+using Messager.Model;
 
 namespace Messager.Api.Controllers
 {
@@ -11,7 +12,7 @@ namespace Messager.Api.Controllers
     {
         private readonly IChatsRepository _chatsRepository;
         private readonly IMessagesRepository _messagesRepository;
-        private readonly String _connectionString = Properties.Settings.Default.ConnectionString;
+        private readonly String _connectionString = Settings.Default.ConnectionString;
 
         public ChatsController()
         {
@@ -39,7 +40,6 @@ namespace Messager.Api.Controllers
         public void Delete(Guid id)
         {
              _chatsRepository.DeleteChat(id);
-            return;
         }
 
         [HttpPut]
@@ -47,7 +47,6 @@ namespace Messager.Api.Controllers
         public void DeleteMember(Guid chatId, Guid userId)
         {
             _chatsRepository.DeleteMember(chatId, userId);
-            return;
         }
 
         [HttpGet]
@@ -66,7 +65,7 @@ namespace Messager.Api.Controllers
 
         [HttpGet]
         [Route("api/{userId}/chats/{chatId}/messages")]
-        public Model.Message[] GetMessagesForUser(Guid userId, Guid chatId)
+        public Message[] GetMessagesForUser(Guid userId, Guid chatId)
         {
             return _messagesRepository.GetMessagesForUser(chatId, userId).ToArray();
         }
