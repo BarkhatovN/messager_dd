@@ -2,27 +2,22 @@
 using Messager.DataLayer.Sql;
 using Messager.Model;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
-using System.Web.Services.Description;
 
 namespace Messager.Api.Controllers
 {
     public class ChatsController : ApiController
     {
-        private readonly IUsersRepository _usersRepository;
         private readonly IChatsRepository _chatsRepository;
         private readonly IMessagesRepository _messagesRepository;
-        private readonly String ConnectionString = Properties.Settings.Default.ConnectionString;
+        private readonly String _connectionString = Properties.Settings.Default.ConnectionString;
 
         public ChatsController()
         {
-            _usersRepository = new UsersRepository(ConnectionString);
-            _chatsRepository = new ChatsRepository(ConnectionString, _usersRepository);
-            _messagesRepository = new MessagesRepository(ConnectionString, _usersRepository, _chatsRepository);
+            IUsersRepository usersRepository = new UsersRepository(_connectionString);
+            _chatsRepository = new ChatsRepository(_connectionString, usersRepository);
+            _messagesRepository = new MessagesRepository(_connectionString, usersRepository, _chatsRepository);
         }
 
         [HttpPut]

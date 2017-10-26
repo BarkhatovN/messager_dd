@@ -27,7 +27,7 @@ namespace Messager.Api.Properties {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=messager.database.windows.net;Initial Catalog=messager_db;Persist Sec" +
-            "urity Info=True;User ID=AdminLogin;Password=Qwer1234")]
+            "urity Info=True;User ID=AdminLogin;Password=")]
         public string ConnectionString {
             get {
                 return ((string)(this["ConnectionString"]));
