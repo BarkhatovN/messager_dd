@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Text;
 using System.Linq;
-using Messager.DataLayer;
-using Messager.DataLayer.Sql;
 using Messager.Model;
 
 
@@ -13,16 +12,16 @@ namespace Messager.DataLayer.Sql.Tests
     [TestClass]
     public class MessagesRepositoryTests
     {
-        private readonly String ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
+        private const string ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
 
-        private List<Guid> _tmpMessages = new List<Guid>();
-        private List<Guid> _tmpChats = new List<Guid>();
-        private List<Guid> _tmpUsers = new List<Guid>();
-        private List<ChatsRepositoryTests.ChatIdMemberId> _tempChatIdMemberIds = new List<ChatsRepositoryTests.ChatIdMemberId>();
+        private readonly List<Guid> _tmpMessages = new List<Guid>();
+        private readonly List<Guid> _tmpChats = new List<Guid>();
+        private readonly List<Guid> _tmpUsers = new List<Guid>();
+        private readonly List<ChatsRepositoryTests.ChatIdMemberId> _tempChatIdMemberIds = new List<ChatsRepositoryTests.ChatIdMemberId>();
 
-        private List<User> Users;
-        private Message Message;
-        private Chat Chat;
+        private List<User> _users;
+        private Message _message;
+        private Chat _chat;
 
         [TestInitialize]
         public void Initialize()
@@ -53,28 +52,28 @@ namespace Messager.DataLayer.Sql.Tests
 
             var usersRepository = new UsersRepository(ConnectionString);
 
-            Users = new List<User>
+            _users = new List<User>
             {
                 usersRepository.CreateUser(user1),
                 usersRepository.CreateUser(user2),
                 usersRepository.CreateUser(user3)
             };
-            _tmpUsers.AddRange(Users.Select(u => u.Id));
+            _tmpUsers.AddRange(_users.Select(u => u.Id));
 
-            Chat = new Chat
+            _chat = new Chat
             {
                 Name = "ChatName",
-                Creater = Users[0],
-                Members = Users
+                Creater = _users[0],
+                Members = _users
             };
 
             var chatRepository = new ChatsRepository(ConnectionString, usersRepository);
-            Chat = chatRepository.CreateChat(Chat);
-            _tmpChats.Add(Chat.Id);
-            foreach (var m in Chat.Members)
+            _chat = chatRepository.CreateChat(_chat);
+            _tmpChats.Add(_chat.Id);
+            foreach (var m in _chat.Members)
                 _tempChatIdMemberIds.Add(new ChatsRepositoryTests.ChatIdMemberId
                 {
-                    ChatId = Chat.Id,
+                    ChatId = _chat.Id,
                     MemberId = m.Id
                 });
 
@@ -84,10 +83,10 @@ namespace Messager.DataLayer.Sql.Tests
                 Encoding.UTF8.GetBytes("Image2"),
             };
 
-            Message = new Message
+            _message = new Message
             {
-                User = Users[0],
-                Chat = Chat,
+                User = _users[0],
+                Chat = _chat,
                 Date = DateTime.Now.ToUniversalTime(),
                 IsSelfDestructing = false,
                 Text = "Hello Tester, How are you?",
@@ -104,14 +103,14 @@ namespace Messager.DataLayer.Sql.Tests
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
 
             //act
-            var message = messagesRepository.CreateMessage(Message);
+            var message = messagesRepository.CreateMessage(_message);
             _tmpMessages.Add(message.Id);
 
             //assert
-            Assert.AreEqual(Message.Text, message.Text);
-            Assert.AreEqual(Message.Date, message.Date);
-            Assert.AreEqual(Message.Chat.Id, message.Chat.Id);
-            Assert.AreEqual(Message.User.Id, message.User.Id);
+            Assert.AreEqual(_message.Text, message.Text);
+            Assert.AreEqual(_message.Date, message.Date);
+            Assert.AreEqual(_message.Chat.Id, message.Chat.Id);
+            Assert.AreEqual(_message.User.Id, message.User.Id);
         }
 
         [TestMethod]
@@ -121,7 +120,7 @@ namespace Messager.DataLayer.Sql.Tests
             var usersRepository = new UsersRepository(ConnectionString);
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
-            var createdMessage = messagesRepository.CreateMessage(Message);
+            var createdMessage = messagesRepository.CreateMessage(_message);
             _tmpMessages.Add(createdMessage.Id);
 
             //act
@@ -130,7 +129,7 @@ namespace Messager.DataLayer.Sql.Tests
             //assert
             Assert.AreEqual(createdMessage.Text, gottenMessage.Text);
             Assert.AreEqual(createdMessage.IsSelfDestructing, gottenMessage.IsSelfDestructing);
-            Assert.AreEqual(createdMessage.Date.ToString(), gottenMessage.Date.ToString());
+            Assert.AreEqual(createdMessage.Date.ToString(CultureInfo.InvariantCulture), gottenMessage.Date.ToString(CultureInfo.InvariantCulture));
             if (createdMessage.Attachments.ElementAt(0).Length == 
                     gottenMessage.Attachments.ElementAt(0).Length)
             {
@@ -155,7 +154,7 @@ namespace Messager.DataLayer.Sql.Tests
             var usersRepository = new UsersRepository(ConnectionString);
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
-            var message = messagesRepository.CreateMessage(Message);
+            var message = messagesRepository.CreateMessage(_message);
             
             //act
             messagesRepository.DeleteMessage(message.Id);

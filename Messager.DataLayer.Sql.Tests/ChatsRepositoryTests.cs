@@ -16,14 +16,14 @@ namespace Messager.DataLayer.Sql.Tests
 
         private readonly String ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
 
-        private List<Guid> _tempChatIds = new List<Guid>();
-        private List<Guid> _tempUserIds = new List<Guid>();
-        private List<Guid> _tempMessageIds = new List<Guid>();
-        private List<ChatIdMemberId> _tempChatIdMemberIds = new List<ChatIdMemberId>();
+        private readonly List<Guid> _tempChatIds = new List<Guid>();
+        private readonly List<Guid> _tempUserIds = new List<Guid>();
+        private readonly List<Guid> _tempMessageIds = new List<Guid>();
+        private readonly List<ChatIdMemberId> _tempChatIdMemberIds = new List<ChatIdMemberId>();
 
-        private List<User> Users;
-        private Chat Chat;
-        private List<Message> Messages;
+        private List<User> _users;
+        private Chat _chat;
+        private List<Message> _messages;
 
         [TestInitialize]
         public void Initialize()
@@ -53,37 +53,37 @@ namespace Messager.DataLayer.Sql.Tests
             };
 
             var usersRepository = new UsersRepository(ConnectionString);
-            Users = new List<User>
+            _users = new List<User>
             {
                 usersRepository.CreateUser(user1),
                 usersRepository.CreateUser(user2),
                 usersRepository.CreateUser(user3)
             };
-            _tempUserIds.AddRange(Users.Select(u=>u.Id));
+            _tempUserIds.AddRange(_users.Select(u=>u.Id));
             
             var chat = new Chat
             {
-                Creater = Users[0],
-                Members = new[] { Users[0], Users[1] },
+                Creater = _users[0],
+                Members = new[] { _users[0], _users[1] },
                 Name = "ChatName"
             };
 
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
-            Chat = chatsRepository.CreateChat(chat);
-            _tempChatIds.Add(Chat.Id);
+            _chat = chatsRepository.CreateChat(chat);
+            _tempChatIds.Add(_chat.Id);
             _tempChatIdMemberIds.AddRange(new[]
             {
-                new ChatIdMemberId{ ChatId = Chat.Id, MemberId = Users[0].Id },
-                new ChatIdMemberId{ ChatId = Chat.Id, MemberId = Users[1].Id }
+                new ChatIdMemberId{ ChatId = _chat.Id, MemberId = _users[0].Id },
+                new ChatIdMemberId{ ChatId = _chat.Id, MemberId = _users[1].Id }
             });
 
             var message1 = new Message
             {
-                Chat = Chat,
+                Chat = _chat,
                 Date = DateTime.Now.ToUniversalTime(),
                 IsSelfDestructing = false,
                 Text = "Message1",
-                User = Users[0],
+                User = _users[0],
                 Attachments = new[]
                 {
                     Encoding.UTF8.GetBytes("Hello"),
@@ -93,21 +93,21 @@ namespace Messager.DataLayer.Sql.Tests
 
             var message2 = new Message
             {
-                Chat = Chat,
+                Chat = _chat,
                 Date = DateTime.Now.ToUniversalTime(),
                 IsSelfDestructing = false,
                 Text = "Message2",
-                User = Users[0]
+                User = _users[0]
             };
 
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
-            Messages = new List<Message> 
+            _messages = new List<Message> 
             {
                 messagesRepository.CreateMessage(message1),
                 messagesRepository.CreateMessage(message2)
             };
-            _tempMessageIds.AddRange(Messages.Select(m => m.Id));
-            Chat.Messages = Messages;
+            _tempMessageIds.AddRange(_messages.Select(m => m.Id));
+            _chat.Messages = _messages;
         }
 
         [TestMethod]
@@ -118,12 +118,12 @@ namespace Messager.DataLayer.Sql.Tests
             var chatRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            chatRepository.AddMember(Chat.Id, Users[2].Id);
-            _tempChatIdMemberIds.Add(new ChatIdMemberId { ChatId = Chat.Id, MemberId = Users[2].Id });
-            var members = chatRepository.GetMembers(Chat.Id);
+            chatRepository.AddMember(_chat.Id, _users[2].Id);
+            _tempChatIdMemberIds.Add(new ChatIdMemberId { ChatId = _chat.Id, MemberId = _users[2].Id });
+            var members = chatRepository.GetMembers(_chat.Id);
 
             //Assert
-            Assert.IsTrue(members.Select(x => x.Id).Contains(Users[2].Id));
+            Assert.IsTrue(members.Select(x => x.Id).Contains(_users[2].Id));
         }
 
         [TestMethod]
@@ -134,13 +134,12 @@ namespace Messager.DataLayer.Sql.Tests
             var chatRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            chatRepository.DeleteMember(Chat.Id, Users[1].Id);
-            _tempChatIdMemberIds.Remove(_tempChatIdMemberIds.Find(x=>x.ChatId == Chat.Id && x.MemberId == Users[1].Id));
-            var members = chatRepository.GetMembers(Chat.Id);
+            chatRepository.DeleteMember(_chat.Id, _users[1].Id);
+            _tempChatIdMemberIds.Remove(_tempChatIdMemberIds.Find(x=>x.ChatId == _chat.Id && x.MemberId == _users[1].Id));
+            var members = chatRepository.GetMembers(_chat.Id);
 
             //Assert
-            Assert.IsFalse(members.Select(x => x.Id).Contains(Users[1].Id));
- 
+            Assert.IsFalse(members.Select(x => x.Id).Contains(_users[1].Id));
         }
 
         [TestMethod]
@@ -152,22 +151,22 @@ namespace Messager.DataLayer.Sql.Tests
             var chatWithOneMember = new Chat
             {
                 Name = "ChatName",
-                Creater = Users[0],
-                Members = new List<User> { Users[0] }
+                Creater = _users[0],
+                Members = new List<User> { _users[0] }
             };
 
             var chatWithTwoMembers = new Chat
             {
                 Name = "ChatName",
-                Creater = Users[0],
-                Members = new List<User> { Users[0], Users[1] }
+                Creater = _users[0],
+                Members = new List<User> { _users[0], _users[1] }
             };
 
             var chatWithThreeMembers = new Chat
             {
                 Name = "ChatName",
-                Creater = Users[0],
-                Members = new List<User> { Users[0], Users[1], Users[2] }
+                Creater = _users[0],
+                Members = new List<User> { _users[0], _users[1], _users[2] }
             };
 
             //act
@@ -204,11 +203,11 @@ namespace Messager.DataLayer.Sql.Tests
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            chatsRepository.DeleteChat(Chat.Id);
-            _tempChatIds.Remove(Chat.Id);
+            chatsRepository.DeleteChat(_chat.Id);
+            _tempChatIds.Remove(_chat.Id);
 
             //assert
-            Assert.ThrowsException<ArgumentException>(() => chatsRepository.GetChatInfo(Chat.Id));
+            Assert.ThrowsException<ArgumentException>(() => chatsRepository.GetChatInfo(_chat.Id));
         }
 
         [TestMethod]
@@ -219,12 +218,12 @@ namespace Messager.DataLayer.Sql.Tests
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            var gottenChat = chatsRepository.GetChatInfo(Chat.Id);
+            var gottenChat = chatsRepository.GetChatInfo(_chat.Id);
 
             //Assert
-            Assert.AreEqual(Chat.Id, gottenChat.Id);
-            Assert.AreEqual(Chat.Name, gottenChat.Name);
-            Assert.AreEqual(Chat.Creater.Id, gottenChat.Creater.Id);
+            Assert.AreEqual(_chat.Id, gottenChat.Id);
+            Assert.AreEqual(_chat.Name, gottenChat.Name);
+            Assert.AreEqual(_chat.Creater.Id, gottenChat.Creater.Id);
         }
 
         [TestMethod]
@@ -236,11 +235,11 @@ namespace Messager.DataLayer.Sql.Tests
             var messagesRepository = new MessagesRepository(ConnectionString, usersRepository, chatsRepository);
             
             //act
-            var messagesOfUser = messagesRepository.GetMessagesForUser(Chat.Id, Messages[0].User.Id);
+            var messagesOfUser = messagesRepository.GetMessagesForUser(_chat.Id, _messages[0].User.Id);
 
             //assert
             Assert.IsNotNull(messagesOfUser);
-            Assert.IsTrue(messagesOfUser.Select(x => x.Id).Contains(Messages[0].Id));
+            Assert.IsTrue(messagesOfUser.Select(x => x.Id).Contains(_messages[0].Id));
         }
 
         [TestMethod]
@@ -251,10 +250,10 @@ namespace Messager.DataLayer.Sql.Tests
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            var members = chatsRepository.GetMembers(Chat.Id);
+            var members = chatsRepository.GetMembers(_chat.Id);
 
             //assert
-            Assert.AreEqual(members.Count(), Chat.Members.Count());
+            Assert.AreEqual(members.Count(), _chat.Members.Count());
         }
 
         [TestMethod] 
@@ -265,14 +264,14 @@ namespace Messager.DataLayer.Sql.Tests
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            var gottenChat = chatsRepository.GetChat(Chat.Id, Chat.Creater.Id);
+            var gottenChat = chatsRepository.GetChat(_chat.Id, _chat.Creater.Id);
 
             //assert
-            Assert.AreEqual(Chat.Members.Count(), gottenChat.Members.Count());
-            Assert.AreEqual(Chat.Id, gottenChat.Id);
-            Assert.AreEqual(Chat.Name, gottenChat.Name);
-            Assert.AreEqual(Chat.Creater.Id, gottenChat.Creater.Id);
-            Assert.AreEqual(Chat.Messages.Count(), gottenChat.Messages.Count());
+            Assert.AreEqual(_chat.Members.Count(), gottenChat.Members.Count());
+            Assert.AreEqual(_chat.Id, gottenChat.Id);
+            Assert.AreEqual(_chat.Name, gottenChat.Name);
+            Assert.AreEqual(_chat.Creater.Id, gottenChat.Creater.Id);
+            Assert.AreEqual(_chat.Messages.Count(), gottenChat.Messages.Count());
         }
 
         [TestMethod]
@@ -283,7 +282,7 @@ namespace Messager.DataLayer.Sql.Tests
             var chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
 
             //act
-            var messages = chatsRepository.SearchMessagesByPhraseForUser(Chat.Creater.Id, "Message");
+            var messages = chatsRepository.SearchMessagesByPhraseForUser(_chat.Creater.Id, "Message");
 
             //Assert
             Assert.IsNotNull(messages);

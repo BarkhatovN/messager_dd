@@ -11,17 +11,17 @@ namespace Messager.DataLayer.Sql.Tests
     [TestClass]
     public class UsersRepositoryTests
     {
-        private readonly string ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
+        private const string ConnectionString = @"Server=POTM-PC\SQLEXPRESS;Database=messager_db;User Id=potm2;Password=12312322;";
 
         private readonly List<Guid> _tempUsers = new List<Guid>();
 
-        private User userWithoutPhoto;
+        private User _userWithoutPhoto;
         private User userWithPhoto;
 
         [TestInitialize]
         public void Initialize()
         {
-            userWithoutPhoto = new User
+            _userWithoutPhoto = new User
             {
                 FirstName = "Thomas",
                 LastName = "Anderson",
@@ -50,15 +50,15 @@ namespace Messager.DataLayer.Sql.Tests
             var repository = new UsersRepository(ConnectionString);
 
             //act
-            var createdUWithoutPhoto = repository.CreateUser(userWithoutPhoto);
+            var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
             var createdUWithPhoto = repository.CreateUser(userWithPhoto);
             _tempUsers.AddRange(new[] { createdUWithoutPhoto.Id, createdUWithPhoto.Id });
 
             //Asserts
-            Assert.AreEqual(userWithoutPhoto.FirstName, createdUWithoutPhoto.FirstName);
-            Assert.AreEqual(userWithoutPhoto.LastName, createdUWithoutPhoto.LastName);
-            Assert.AreEqual(userWithoutPhoto.Login, createdUWithoutPhoto.Login);
-            Assert.AreEqual(userWithoutPhoto.Password, createdUWithoutPhoto.Password);
+            Assert.AreEqual(_userWithoutPhoto.FirstName, createdUWithoutPhoto.FirstName);
+            Assert.AreEqual(_userWithoutPhoto.LastName, createdUWithoutPhoto.LastName);
+            Assert.AreEqual(_userWithoutPhoto.Login, createdUWithoutPhoto.Login);
+            Assert.AreEqual(_userWithoutPhoto.Password, createdUWithoutPhoto.Password);
 
 
             Assert.AreEqual(userWithPhoto.FirstName, createdUWithPhoto.FirstName);
@@ -73,7 +73,7 @@ namespace Messager.DataLayer.Sql.Tests
         {
             //arrange
             var repository = new UsersRepository(ConnectionString);
-            var createdUser = repository.CreateUser(userWithoutPhoto);
+            var createdUser = repository.CreateUser(_userWithoutPhoto);
 
             //act
             repository.DeleteUser(createdUser.Id);
@@ -88,7 +88,7 @@ namespace Messager.DataLayer.Sql.Tests
             //arrange
             var repository = new UsersRepository(ConnectionString);
             var createdUWithPhoto = repository.CreateUser(userWithPhoto);
-            var createdUWithoutPhoto = repository.CreateUser(userWithoutPhoto);
+            var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
 
             _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
 
@@ -118,7 +118,7 @@ namespace Messager.DataLayer.Sql.Tests
             //arrange
             var repository = new UsersRepository(ConnectionString);
             var createdUWithPhoto = repository.CreateUser(userWithPhoto);
-            var createdUWithoutPhoto = repository.CreateUser(userWithoutPhoto);
+            var createdUWithoutPhoto = repository.CreateUser(_userWithoutPhoto);
             _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
 
             //act
@@ -146,7 +146,7 @@ namespace Messager.DataLayer.Sql.Tests
         {
             //arrange
             var repository = new UsersRepository(ConnectionString);
-            var createdUser = repository.CreateUser(userWithoutPhoto);
+            var createdUser = repository.CreateUser(_userWithoutPhoto);
             _tempUsers.Add(createdUser.Id);
 
             var newUserData = userWithPhoto;
