@@ -52,6 +52,7 @@
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http" />
@@ -103,12 +104,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -123,7 +118,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Messager.DataLayer.Sql\Messager.DataLayer.Sql.csproj">
@@ -133,6 +127,14 @@
     <ProjectReference Include="..\Messager.DataLayer\Messager.DataLayer.csproj">
       <Project>{c05bca68-248b-478b-a1b9-2cac844fbedd}</Project>
       <Name>Messager.DataLayer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Messager.Filters\Messager.Filters.csproj">
+      <Project>{a7f75c10-9434-463a-9edf-9c3aa03250d0}</Project>
+      <Name>Messager.Filters</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Messager.Logger\Messager.Logger.csproj">
+      <Project>{f9f0449e-31a4-4812-829e-a38382015cb3}</Project>
+      <Name>Messager.Logger</Name>
     </ProjectReference>
     <ProjectReference Include="..\Messager.Model\Messager.Model.csproj">
       <Project>{1e371f09-6e92-4817-b2f2-7c2f84fda47c}</Project>

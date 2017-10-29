@@ -10,29 +10,32 @@ namespace Messager.Api.Controllers
 {
     public class MessagesController : ApiController
     {
-        private readonly IUsersRepository _usersRepository;
+        private readonly NLog.ILogger _logger = Logger.Logger.Instance;
         private readonly IChatsRepository _chatsRepository;
         private readonly IMessagesRepository _messagesRepository;
-        private readonly String ConnectionString = Settings.Default.ConnectionString;
+        private readonly string ConnectionString = Settings.Default.ConnectionString;
 
         public MessagesController()
         {
-            _usersRepository = new UsersRepository(ConnectionString);
-            _chatsRepository = new ChatsRepository(ConnectionString, _usersRepository);
-            _messagesRepository = new MessagesRepository(ConnectionString, _usersRepository, _chatsRepository);
+            IUsersRepository usersRepository = new UsersRepository(ConnectionString);
+            _chatsRepository = new ChatsRepository(ConnectionString, usersRepository);
+            _messagesRepository = new MessagesRepository(ConnectionString, usersRepository, _chatsRepository);
         }
 
         [HttpPost]
         [Route("api/messages")]
         public Message Create([FromBody] Message message)
         {
-            return _messagesRepository.CreateMessage(message);
+           var createdMessage = _messagesRepository.CreateMessage(message);
+            _logger.Info($"Message with id: {createdMessage.Id} has been created");
+            return createdMessage;
         }
 
         [HttpGet]
         [Route("api/{userId}/messages/{phrase}")]
-        public Message[] SearchMessagesForUser(Guid userId,String phrase)
+        public Message[] SearchMessagesForUser(Guid userId, string phrase)
         {
+            _logger.Info($"Messages with phrase: {phrase} has been quried");
             return _chatsRepository.SearchMessagesByPhraseForUser(userId, phrase).ToArray();
         }
     }

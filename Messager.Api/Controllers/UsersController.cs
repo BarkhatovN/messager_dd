@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Net;
 using System.Web.Http;
 using Messager.Api.Properties;
 using Messager.DataLayer;
 using Messager.DataLayer.Sql;
 using Messager.Model;
-using NLog;
 
 
 namespace Messager.Api.Controllers
@@ -12,7 +12,7 @@ namespace Messager.Api.Controllers
     public class UsersController : ApiController
     {
 
-        private ILogger logger;
+        private readonly NLog.ILogger _logger = Logger.Logger.Instance;
         private readonly IUsersRepository _usersRepository;
         private readonly string _connectionString = Settings.Default.ConnectionString;
 
@@ -25,18 +25,15 @@ namespace Messager.Api.Controllers
         [Route("api/users/{id}")]
         public User GetById(Guid id)
         {
-            logger.Info($"{DateTime.Now.ToShortDateString()} Был получен запрос на пользователь с Id: {id}");
-            try
-            {
-                return _usersRepository.GetUser(id);
-            }
+            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Id: {id} has been queried");
+            return    _usersRepository.GetUser(id);
         }
 
         [HttpGet]
         [Route("api/users/{Login}")]
         public User GetByLogin(string login)
         {
-            logger.Info($"{DateTime.Now.ToShortDateString()} Пользователь с Id: {login} был выдан");
+            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Login: {login} has been queried");
             return _usersRepository.GetUser(login);
         }
 
@@ -44,13 +41,16 @@ namespace Messager.Api.Controllers
         [Route("api/users")]
         public User Create([FromBody] User user)
         {
-            return _usersRepository.CreateUser(user);
+            var createdUser = _usersRepository.CreateUser(user);
+            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Id: {createdUser.Id} has been created");
+            return createdUser;
         }
 
         [HttpPut]
         [Route("api/users/{id}")]
         public void Update([FromBody] User user)
         {
+            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Id: {user.Id} has been updated");
             _usersRepository.UpdateUser(user);
         }
 
@@ -58,6 +58,7 @@ namespace Messager.Api.Controllers
         [Route("api/users/{id}")]
         public void Delete(Guid id)
         {
+            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Id: {id} has been deleted");
             _usersRepository.DeleteUser(id);
         }
     }

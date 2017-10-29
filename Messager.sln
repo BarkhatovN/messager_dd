@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.DataLayer.Sql.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.Api", "Messager.Api\Messager.Api.csproj", "{693F79A8-C17D-4747-8C65-9556FD8B4905}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.Logger", "Messager.Logger\Messager.Logger.csproj", "{F9F0449E-31A4-4812-829E-A38382015CB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.Filters", "Messager.Filters\Messager.Filters.csproj", "{A7F75C10-9434-463A-9EDF-9C3AA03250D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{693F79A8-C17D-4747-8C65-9556FD8B4905}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{693F79A8-C17D-4747-8C65-9556FD8B4905}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{693F79A8-C17D-4747-8C65-9556FD8B4905}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9F0449E-31A4-4812-829E-A38382015CB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9F0449E-31A4-4812-829E-A38382015CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9F0449E-31A4-4812-829E-A38382015CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9F0449E-31A4-4812-829E-A38382015CB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
