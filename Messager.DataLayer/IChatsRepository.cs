@@ -7,7 +7,7 @@ namespace Messager.DataLayer
     public interface IChatsRepository
     {
         Chat GetChat(Guid id, Guid userId);
-        Chat GetChatInfo(Guid ChatId);
+        Chat GetChatInfo(Guid chatId);
         Chat CreateChat(Chat chat);
         IEnumerable<User> GetMembers(Guid chatId);
         void DeleteChat(Guid chatId);

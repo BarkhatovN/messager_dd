@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Web.Http;
 using Messager.Api.Properties;
 using Messager.DataLayer;

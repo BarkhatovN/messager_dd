@@ -13,7 +13,7 @@ namespace Messager.DataLayer.Sql
         private readonly IUsersRepository _usersRepository;
         private readonly IChatsRepository _chatsRepository;
 
-        public MessagesRepository(String connectionString, IUsersRepository usersRepository, IChatsRepository chatsRepository)
+        public MessagesRepository(string connectionString, IUsersRepository usersRepository, IChatsRepository chatsRepository)
         {
             _connectionString = connectionString;
             _usersRepository = usersRepository;
@@ -123,7 +123,6 @@ namespace Messager.DataLayer.Sql
                 var user = _usersRepository.GetUser(userId);
                 var chat = _chatsRepository.GetChatInfo(chatId);
                 connection.Open();
-                ICollection<Message> messages = new List<Message>();
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "GetMessagesForUser";
@@ -163,7 +162,7 @@ namespace Messager.DataLayer.Sql
                             }
                             else
                             {
-                                prevMessage.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
+                                prevMessage?.Attachments.Add(reader.GetSqlBinary(reader.GetOrdinal("File")).Value);
                             }
                         }
                         if (prevMessage == null)
