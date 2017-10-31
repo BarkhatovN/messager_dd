@@ -155,10 +155,11 @@ namespace Messager.DataLayer.Sql
             };
         }
 
-        public IEnumerable<User> GetMembers(Guid chatId)
+        public IReadOnlyList<User> GetMembers(Guid chatId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
+                var result = new List<User>();
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
@@ -169,16 +170,15 @@ namespace Messager.DataLayer.Sql
                     {
                         while (reader.Read())
                         {
-                            yield return _usersRepository.GetUser(reader.GetGuid(reader.GetOrdinal("UserId")));
+                             result.Add(_usersRepository.GetUser(reader.GetGuid(reader.GetOrdinal("UserId"))));
                         }
+                        return result.AsReadOnly();
                     }
                 }
             }
-
         }
-
         
-        public IEnumerable<Message> SearchMessagesByPhraseForUser(Guid userId, String phrase)
+        public IReadOnlyList<Message> SearchMessagesByPhraseForUser(Guid userId, String phrase)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -196,7 +196,7 @@ namespace Messager.DataLayer.Sql
                     using (var reader = command.ExecuteReader())
                     {
                         Message prevMessage = null;
-                        Guid prevId = Guid.NewGuid();
+                        var prevId = Guid.NewGuid();
                         var result = new List<Message>();
                         while (reader.Read())
                         {
@@ -231,8 +231,8 @@ namespace Messager.DataLayer.Sql
                         if (prevMessage == null)
                             return null;
                         result.Add(prevMessage);
-                        return result;
 
+                        return result.AsReadOnly();
                     }
                 }
 

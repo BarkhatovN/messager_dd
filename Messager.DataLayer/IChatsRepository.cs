@@ -9,10 +9,10 @@ namespace Messager.DataLayer
         Chat GetChat(Guid id, Guid userId);
         Chat GetChatInfo(Guid chatId);
         Chat CreateChat(Chat chat);
-        IEnumerable<User> GetMembers(Guid chatId);
+        IReadOnlyList<User> GetMembers(Guid chatId);
         void DeleteChat(Guid chatId);
         void AddMember(Guid chatId, Guid userId);
         void DeleteMember(Guid userId, Guid chatId);
-        IEnumerable<Message> SearchMessagesByPhraseForUser(Guid userId, String phrase);
+        IReadOnlyList<Message> SearchMessagesByPhraseForUser(Guid userId, string phrase);
     }
 }

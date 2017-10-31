@@ -8,7 +8,6 @@ namespace Messager.DataLayer.Sql
 {
     public class MessagesRepository : IMessagesRepository
     {
-
         private readonly string _connectionString;
         private readonly IUsersRepository _usersRepository;
         private readonly IChatsRepository _chatsRepository;
@@ -116,7 +115,7 @@ namespace Messager.DataLayer.Sql
             }
         }
 
-        public IEnumerable<Message> GetMessagesForUser(Guid chatId, Guid userId)
+        public IReadOnlyList<Message> GetMessagesForUser(Guid chatId, Guid userId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -172,7 +171,7 @@ namespace Messager.DataLayer.Sql
 
                         result.FindAll(m => m.IsSelfDestructing && m.User.Id == userId).ForEach(m => DeleteMessage(m.Id));
 
-                        return result;
+                        return result.AsReadOnly();
                     }
                 }
             }
