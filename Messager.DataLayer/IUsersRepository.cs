@@ -7,7 +7,7 @@ namespace Messager.DataLayer
     {
         User CreateUser(User user);
         User GetUser(Guid userId);
-        User GetUser(string login);
+        User GetUser(string login, string password);
         void DeleteUser(Guid userId);
         void UpdateUser(User user);
     }
