@@ -70,7 +70,7 @@ namespace Messager.DataLayer.Sql
             }
         }
 
-        public User GetUser(string login)
+        public User GetUser(string login, string password)
         {
             var encoding = new UTF8Encoding();
             using (var connection = new SqlConnection(_connectionString))
@@ -85,7 +85,7 @@ namespace Messager.DataLayer.Sql
                     {
                         if (!reader.Read())
                             throw new ArgumentException($"User with Login: {login} has not been found");
-                        return new User
+                        var user =  new User
                         {
                             Id = reader.GetGuid(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
@@ -95,6 +95,9 @@ namespace Messager.DataLayer.Sql
                             Login = reader.GetString(reader.GetOrdinal("Login")),
                             Password = reader.GetString(reader.GetOrdinal("PasswordHash"))
                         };
+                        if (user.Password == password)
+                            return user;
+                        throw new ArgumentException("User`s password is incorrect");
                     }
                 }
             }
