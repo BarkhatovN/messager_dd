@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.Logger", "Messager
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.Filters", "Messager.Filters\Messager.Filters.csproj", "{A7F75C10-9434-463A-9EDF-9C3AA03250D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager.WinForms", "Messager.WinForms\Messager.WinForms.csproj", "{91FAF6BA-FDF9-4AB2-8774-611886CD4F84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7F75C10-9434-463A-9EDF-9C3AA03250D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91FAF6BA-FDF9-4AB2-8774-611886CD4F84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91FAF6BA-FDF9-4AB2-8774-611886CD4F84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91FAF6BA-FDF9-4AB2-8774-611886CD4F84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91FAF6BA-FDF9-4AB2-8774-611886CD4F84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
