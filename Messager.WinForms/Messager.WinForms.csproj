@@ -70,11 +70,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ChatControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ChatControl.Designer.cs">
+      <DependentUpon>ChatControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\LoginControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\LoginControl.Designer.cs">
       <DependentUpon>LoginControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MessageControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\MessageControl.Designer.cs">
+      <DependentUpon>MessageControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RegistrationControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\RegistrationControl.Designer.cs">
+      <DependentUpon>RegistrationControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\StartControl.cs">
       <SubType>UserControl</SubType>
@@ -91,8 +109,17 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceClient.cs" />
+    <EmbeddedResource Include="Controls\ChatControl.resx">
+      <DependentUpon>ChatControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\LoginControl.resx">
       <DependentUpon>LoginControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\MessageControl.resx">
+      <DependentUpon>MessageControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RegistrationControl.resx">
+      <DependentUpon>RegistrationControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\StartControl.resx">
       <DependentUpon>StartControl.cs</DependentUpon>
@@ -110,6 +137,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\Messager.WinForms.Controls.MessageControl.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

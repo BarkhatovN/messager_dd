@@ -28,5 +28,11 @@ namespace Messager.WinForms.Controls
         {
 
         }
+
+        private void RegisterBtn_Click(object sender, EventArgs e)
+        {
+            var parentForm = (ParentForm as MainForm);
+            parentForm.SetState(MainForm.States.Registration);
+        }
     }
 }

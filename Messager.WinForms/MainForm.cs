@@ -7,14 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Messager.Model;
 using Messager.WinForms.Controls;
 
 namespace Messager.WinForms
 {
     public partial class MainForm : Form
     {
-        private LoginControl loginControl;
-        private StartControl startControl;
+        private readonly Size _startSize = new Size(350, 380);
+        private readonly Size _workSize = new Size(725, 450);
+
+        private User _user;
+        private LoginControl _loginControl;
+        private StartControl _startControl;
+        private RegistrationControl _registrationControl;
+        private ChatControl _chatControl;
 
         public enum States
         {
@@ -24,11 +31,14 @@ namespace Messager.WinForms
             Working
         }
 
-        private States currentState;
-        private States prevState;
+        private States _currentState;
+        private States _prevState;
 
         public void SetState(States state)
         {
+            Size = _startSize;
+
+            Controls.Clear();
             switch (state)
             {
                 case States.Start:
@@ -40,9 +50,12 @@ namespace Messager.WinForms
                     break;
 
                 case States.Registration:
+                    SetRegistrationState();
                     break;
 
                 case States.Working:
+                    Size = _workSize;
+                    SetWorkingState();
                     break;
 
                 default:
@@ -50,30 +63,44 @@ namespace Messager.WinForms
             }
         }
 
+        private void SetWorkingState()
+        {
+            _currentState = States.Working;
+
+            _chatControl = new ChatControl(_user){Location = new Point(0,0)};
+            Controls.Add(_chatControl);
+
+            _prevState = States.Working;
+        }
+
         private void SetStartState()
         {
-            currentState = States.Start;
+            _currentState = States.Start;
             // loc: 10, 80
-            // h w: 315, 220
-            startControl = new StartControl {Location = new Point(10, 20)};
+            _startControl = new StartControl {Location = new Point(10, 20)};
 
-            Controls.Add(startControl);
-            prevState = States.Start;
+            Controls.Add(_startControl);
+            _prevState = States.Start;
         }
 
         private void SetLoginState()
         {
-            if (prevState == States.Start)
-            {
-                Controls.Remove(startControl);
-                startControl = null;
-            }
-            currentState = States.Login;
+            _currentState = States.Login;
 
-            loginControl = new LoginControl {Location = new Point(10, 20)};
-            Controls.Add(loginControl);
+            _loginControl = new LoginControl {Location = new Point(10, 20)};
+            Controls.Add(_loginControl);
 
-            prevState = States.Login;
+            _prevState = States.Login;
+        }
+
+        private void SetRegistrationState()
+        {
+            _currentState = States.Registration;
+
+            _registrationControl = new RegistrationControl(_user) { Location = new Point(10, 0) };
+            Controls.Add(_registrationControl);
+
+            _prevState = States.Registration;
         }
 
         public MainForm()
@@ -81,7 +108,5 @@ namespace Messager.WinForms
             InitializeComponent();
             SetState(States.Start);
         }
-
-
     }
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Messager.Model;
+using Message = Messager.Model.Message;
 
 namespace Messager.WinForms
 {
@@ -56,5 +57,35 @@ namespace Messager.WinForms
 
             return new User();
         }
+
+        public static async Task<User> Authorize(string login, string password)
+        {
+            return new User();
+        }
+
+        public static async Task SendMessage(Message message)
+        {
+        }
+
+        public static async Task CreateChat(Chat chat)
+        {
+            
+        }
+
+        public static async Task GetMessages(Guid chatId, User user)
+        {
+            
+        }
+
+        public static async Task<Chat[]> GetChats(string userLogin)
+        {
+            return new Chat[1];
+        }
+
+        public static async Task AddChatMember(Chat chat, User user)
+        {
+            
+        }
+
     }
 }

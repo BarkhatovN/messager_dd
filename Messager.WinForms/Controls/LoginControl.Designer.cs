@@ -36,7 +36,7 @@
             // 
             // LoginTxt
             // 
-            this.LoginTxt.BackColor = System.Drawing.Color.LightCyan;
+            this.LoginTxt.BackColor = System.Drawing.Color.LightBlue;
             this.LoginTxt.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.LoginTxt.Font = new System.Drawing.Font("Fira Code", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.LoginTxt.ForeColor = System.Drawing.Color.DarkCyan;
@@ -46,13 +46,14 @@
             this.LoginTxt.Name = "LoginTxt";
             this.LoginTxt.Size = new System.Drawing.Size(269, 30);
             this.LoginTxt.TabIndex = 0;
-            this.LoginTxt.Text = "Введите Логин ";
+            this.LoginTxt.Text = "Логин ";
+            this.LoginTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.LoginTxt.Enter += new System.EventHandler(this.LoginTxt_Enter);
             this.LoginTxt.Leave += new System.EventHandler(this.LoginTxt_Leave);
             // 
             // PasswordTxt
             // 
-            this.PasswordTxt.BackColor = System.Drawing.Color.LightCyan;
+            this.PasswordTxt.BackColor = System.Drawing.Color.LightBlue;
             this.PasswordTxt.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.PasswordTxt.Font = new System.Drawing.Font("Fira Code", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.PasswordTxt.ForeColor = System.Drawing.Color.DarkCyan;
@@ -62,7 +63,8 @@
             this.PasswordTxt.Name = "PasswordTxt";
             this.PasswordTxt.Size = new System.Drawing.Size(269, 30);
             this.PasswordTxt.TabIndex = 1;
-            this.PasswordTxt.Text = "Введите пароль";
+            this.PasswordTxt.Text = "Пароль";
+            this.PasswordTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.PasswordTxt.Enter += new System.EventHandler(this.PasswordTxt_Enter);
             this.PasswordTxt.Leave += new System.EventHandler(this.PasswordTxt_Leave);
             // 
@@ -80,6 +82,7 @@
             this.LoginOkBtn.TabIndex = 1;
             this.LoginOkBtn.Text = "Дальше";
             this.LoginOkBtn.UseVisualStyleBackColor = false;
+            this.LoginOkBtn.Click += new System.EventHandler(this.RegistrationOkBtn_Click);
             // 
             // CancelLoginBtn
             // 
@@ -94,6 +97,7 @@
             this.CancelLoginBtn.TabIndex = 1;
             this.CancelLoginBtn.Text = "Отмена";
             this.CancelLoginBtn.UseVisualStyleBackColor = false;
+            this.CancelLoginBtn.Click += new System.EventHandler(this.CancelRegistratioBtn_Click);
             // 
             // LoginControl
             // 

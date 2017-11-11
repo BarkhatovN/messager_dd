@@ -30,10 +30,10 @@ namespace Messager.Api.Controllers
 
         [HttpGet]
         [Route("api/users/{Login}")]
-        public User GetByLogin(string login)
+        public User GetByLogin(string login,string password)
         {
             _logger.Info($"{DateTime.Now.ToShortDateString()} User with Login: {login} has been queried");
-            return _usersRepository.GetUser(login);
+            return _usersRepository.GetUser(login, password);
         }
 
         [HttpPost]

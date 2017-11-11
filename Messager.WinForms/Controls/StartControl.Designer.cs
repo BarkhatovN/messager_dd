@@ -60,6 +60,7 @@
             this.RegisterBtn.TabIndex = 1;
             this.RegisterBtn.Text = "Зарегистрироваться";
             this.RegisterBtn.UseVisualStyleBackColor = false;
+            this.RegisterBtn.Click += new System.EventHandler(this.RegisterBtn_Click);
             // 
             // StartControl
             // 

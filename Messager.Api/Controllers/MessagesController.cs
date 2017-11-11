@@ -24,7 +24,7 @@ namespace Messager.Api.Controllers
 
         [HttpPost]
         [Route("api/messages")]
-        public Message Create([FromBody] Message message)
+        public Message Send([FromBody] Message message)
         {
             var createdMessage = _messagesRepository.CreateMessage(message);
             _logger.Info($"{DateTime.Now.ToShortDateString()} Message with id: {createdMessage.Id} has been created");

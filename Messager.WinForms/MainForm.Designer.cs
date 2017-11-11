@@ -1,4 +1,6 @@
-﻿namespace Messager.WinForms
+﻿using System.Windows.Forms;
+
+namespace Messager.WinForms
 {
     partial class MainForm
     {
@@ -32,11 +34,14 @@
             // 
             // MainForm
             // 
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightCyan;
-            this.ClientSize = new System.Drawing.Size(336, 257);
+            this.ClientSize = new System.Drawing.Size(334, 341);
             this.Name = "MainForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.ResumeLayout(false);
 
