@@ -26,6 +26,8 @@ namespace Messager.Api.Controllers
         [Route("api/messages")]
         public Message Send([FromBody] Message message)
         {
+            if (message.Text == string.Empty && message.Attachments.Count == 0)
+                return message;
             var createdMessage = _messagesRepository.CreateMessage(message);
             _logger.Info($"{DateTime.Now.ToShortDateString()} Message with id: {createdMessage.Id} has been created");
             return createdMessage;

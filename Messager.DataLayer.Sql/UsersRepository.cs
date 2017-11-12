@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
 using Messager.Model;
+using System.Collections.Generic;
 
 namespace Messager.DataLayer.Sql
 {
@@ -39,7 +40,6 @@ namespace Messager.DataLayer.Sql
                 using (var command = connection.CreateCommand())
                 {
                     user.Id = Guid.NewGuid();
-                    user.Password = HashSha1(user.Password);
                     
                     command.CommandText = "AddUser";
                     command.CommandType = CommandType.StoredProcedure;
@@ -95,11 +95,45 @@ namespace Messager.DataLayer.Sql
                             Login = reader.GetString(reader.GetOrdinal("Login")),
                             Password = reader.GetString(reader.GetOrdinal("PasswordHash"))
                         };
-                        if (user.Password == password)
+                        if (password == user.Password)
                             return user;
                         throw new ArgumentException("User`s password is incorrect");
                     }
                 }
+            }
+        }
+
+        public User[] GetUsers()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var users = new List<User>();
+
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "GetUsers";
+                    command.CommandType = CommandType.StoredProcedure;
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var newUser = new User
+                            {
+                                Id = reader.GetGuid(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                Login = reader.GetString(reader.GetOrdinal("Login")),
+                                ProfilePhoto = reader["Photo"] == DBNull.Value ?
+                                  null : reader.GetSqlBinary(reader.GetOrdinal("Photo")).Value,
+                                Password = reader.GetString(reader.GetOrdinal("PasswordHash"))
+                            };
+                            users.Add(newUser);
+                        }
+                    }
+                }
+
+                return users.ToArray();
             }
         }
 

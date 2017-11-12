@@ -52,10 +52,11 @@ namespace Messager.WinForms.Controls
             parentForm.SetState(MainForm.States.Start);
         }
 
-        private  async void RegistrationOkBtn_Click(object sender, EventArgs e)
+        private void RegistrationOkBtn_Click(object sender, EventArgs e)
         {
-            //user = await  ServiceClient.Authorize(LoginTxt.Text.Trim(), PasswordTxt.Text.Trim());
+            user = ServiceClient.Authorize(LoginTxt.Text.Trim(), PasswordTxt.Text.Trim());
             var parentForm = (ParentForm as MainForm);
+            parentForm.user = user;
             parentForm.SetState(MainForm.States.Working);
         }
     }

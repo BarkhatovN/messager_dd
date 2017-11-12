@@ -13,7 +13,9 @@ namespace Messager.DataLayer.Sql.Tests
     {
         public struct ChatIdMemberId { public Guid ChatId; public Guid MemberId; }
 
+
         private readonly string _connectionString = Settings.Default.ConnectionString;
+        //private readonly string _connectionString = Settings.Default.ConnectionString;
 
         private readonly List<Guid> _tempChatIds = new List<Guid>();
         private readonly List<Guid> _tempUserIds = new List<Guid>();
@@ -83,7 +85,7 @@ namespace Messager.DataLayer.Sql.Tests
                 IsSelfDestructing = false,
                 Text = "Message1",
                 User = _users[0],
-                Attachments = new[]
+                Attachments = new List<byte[]>
                 {
                     Encoding.UTF8.GetBytes("Hello"),
                     Encoding.UTF8.GetBytes("World")

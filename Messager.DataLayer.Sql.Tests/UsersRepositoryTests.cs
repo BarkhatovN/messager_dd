@@ -122,8 +122,8 @@ namespace Messager.DataLayer.Sql.Tests
             _tempUsers.AddRange(new[] { createdUWithPhoto.Id, createdUWithoutPhoto.Id });
 
             //act
-            var gottenUWithPhoto = repository.GetUser(createdUWithPhoto.Login);
-            var gottenUWithoutPhoto = repository.GetUser(createdUWithoutPhoto.Login);
+            var gottenUWithPhoto = repository.GetUser(createdUWithPhoto.Login, createdUWithoutPhoto.Password);
+            var gottenUWithoutPhoto = repository.GetUser(createdUWithoutPhoto.Login, createdUWithoutPhoto.Password);
 
             //Asserts
             Assert.AreEqual(createdUWithPhoto.Id, gottenUWithPhoto.Id);
@@ -175,7 +175,7 @@ namespace Messager.DataLayer.Sql.Tests
             foreach (var id in _tempUsers)
                 new UsersRepository(_connectionString).DeleteUser(id);
         }
-        
+
 
     }
 }

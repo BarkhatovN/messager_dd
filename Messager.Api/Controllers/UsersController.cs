@@ -21,23 +21,23 @@ namespace Messager.Api.Controllers
         }
 
         [HttpGet]
-        [Route("api/users/{id}")]
-        public User GetById(Guid id)
+        [Route("api/users/all")]
+        public User[] GetUsers()
         {
-            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Id: {id} has been queried");
-            return    _usersRepository.GetUser(id);
-        }
-
-        [HttpGet]
-        [Route("api/users/{Login}")]
-        public User GetByLogin(string login,string password)
-        {
-            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Login: {login} has been queried");
-            return _usersRepository.GetUser(login, password);
+            var users = _usersRepository.GetUsers();
+            return users;
         }
 
         [HttpPost]
-        [Route("api/users")]
+        [Route("api/users/login")]
+        public User GetByLogin([FromBody]User user)
+        {
+            _logger.Info($"{DateTime.Now.ToShortDateString()} User with Login: {user.Login} has been queried");
+            return _usersRepository.GetUser(user.Login, user.Password);
+        }
+
+        [HttpPost]
+        [Route("api/users/register")]
         public User Create([FromBody] User user)
         {
             var createdUser = _usersRepository.CreateUser(user);

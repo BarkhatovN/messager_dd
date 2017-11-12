@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.authorTxt = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.msgTxt = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // authorTxt
@@ -47,21 +47,21 @@
             this.authorTxt.TabIndex = 2;
             this.authorTxt.Text = "Никита Бархатов";
             // 
-            // textBox1
+            // msgTxt
             // 
-            this.textBox1.BackColor = System.Drawing.Color.LemonChiffon;
-            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox1.Font = new System.Drawing.Font("Fira Code", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox1.ForeColor = System.Drawing.Color.DarkCyan;
-            this.textBox1.Location = new System.Drawing.Point(6, 30);
-            this.textBox1.MaxLength = 80;
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(468, 42);
-            this.textBox1.TabIndex = 3;
-            this.textBox1.Text = "Привет, как дела?\r\nЧто нового?\r\n";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.msgTxt.BackColor = System.Drawing.Color.LemonChiffon;
+            this.msgTxt.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.msgTxt.Font = new System.Drawing.Font("Fira Code", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.msgTxt.ForeColor = System.Drawing.Color.DarkCyan;
+            this.msgTxt.Location = new System.Drawing.Point(6, 30);
+            this.msgTxt.MaxLength = 80;
+            this.msgTxt.Multiline = true;
+            this.msgTxt.Name = "msgTxt";
+            this.msgTxt.ReadOnly = true;
+            this.msgTxt.Size = new System.Drawing.Size(468, 42);
+            this.msgTxt.TabIndex = 3;
+            this.msgTxt.Text = "Привет, как дела?\r\nЧто нового?\r\n";
+            this.msgTxt.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // MessageControl
             // 
@@ -69,7 +69,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.msgTxt);
             this.Controls.Add(this.authorTxt);
             this.Name = "MessageControl";
             this.Size = new System.Drawing.Size(480, 75);
@@ -80,7 +80,7 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox authorTxt;
-        private System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.TextBox authorTxt;
+        public System.Windows.Forms.TextBox msgTxt;
     }
 }

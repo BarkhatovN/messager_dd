@@ -21,10 +21,9 @@ namespace Messager.WinForms.Controls
         public User _user;
         private byte[] _photo;
 
-        public RegistrationControl(User user)
+        public RegistrationControl()
         {
             InitializeComponent();
-            _user = user;
         }
 
         private void LoginTxt_Enter(object sender, EventArgs e)
@@ -83,26 +82,29 @@ namespace Messager.WinForms.Controls
             _photo = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
         }
 
-        private async void LoginOkBtn_Click(object sender, EventArgs e)
+        private void LoginOkBtn_Click(object sender, EventArgs e)
         {
-            //var user = await ServiceClient.RegisterUser(new User
-            //{
-            //    Login = loginTxt.Text.Trim(),
-            //    Password = passwordTxt.Text.Trim(),
-            //    FirstName = firstNameTxt.Text.Trim(),
-            //    LastName = lastNameTxt.Text.Trim(),
-            //    ProfilePhoto = _photo
-            //});
+            registrationOkBtn.Enabled = false;
 
-            //_user.Id = user.Id;
-            //_user.Login = user.Login;
-            //_user.FirstName = user.FirstName;
-            //_user.LastName = user.LastName;
-            //_user.Password = user.Password;
-            //_user.ProfilePhoto = user.ProfilePhoto;
+            if (loginTxt.Text == _loginPlaceHolder)
+            {
+                MessageBox.Show("Ошибка, введите корректные данные");
+                registrationOkBtn.Enabled = true;
+                return;
+            }
+            _user = ServiceClient.RegisterUser(new User
+            {
+                Login = loginTxt.Text.Trim(),
+                Password = passwordTxt.Text.Trim(),
+                FirstName = firstNameTxt.Text.Trim(),
+                LastName = lastNameTxt.Text.Trim(),
+                ProfilePhoto = _photo
+            });
 
+            
             var parentForm = (ParentForm as MainForm);
-            parentForm.SetState(MainForm.States.Start);
+            parentForm.user = _user;
+            parentForm.SetState(MainForm.States.Working);
         }
 
         private void cancelRegistration_Click(object sender, EventArgs e)

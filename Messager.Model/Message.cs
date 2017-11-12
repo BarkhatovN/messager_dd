@@ -9,7 +9,7 @@ namespace Messager.Model
         public User User { get; set; }
         public Chat Chat { get; set; }
         public String Text { get; set; }
-        public ICollection<Byte[]> Attachments { get; set; }
+        public List<Byte[]> Attachments { get; set; }
         public Boolean IsSelfDestructing { get; set; }
         public DateTime Date { get; set; }
     }

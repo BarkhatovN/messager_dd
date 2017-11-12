@@ -8,19 +8,14 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Configuration;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
 namespace Messager.DataLayer.Sql.Tests.Properties {
     
     
-    [CompilerGenerated()]
-    [GeneratedCode("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0")]
-    internal sealed partial class Settings : ApplicationSettingsBase {
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
-        private static Settings defaultInstance = ((Settings)(Synchronized(new Settings())));
+        private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
         
         public static Settings Default {
             get {
@@ -28,12 +23,11 @@ namespace Messager.DataLayer.Sql.Tests.Properties {
             }
         }
         
-        [ApplicationScopedSetting()]
-        [DebuggerNonUserCode()]
-        [SpecialSetting(SpecialSetting.ConnectionString)]
-        [DefaultSettingValue("Server=tcp:messager.database.windows.net,1433;Initial Catalog=messager_db;Persist" +
-            " Security Info=False;User ID=;Password=;MultipleActiveResultSets=False;Encrypt=T" +
-            "rue;TrustServerCertificate=False;Connection Timeout=30;")]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=POTM-PC\\SQLEXPRESS;Initial Catalog=messager_db;User ID=potm2;Password" +
+            "=12312322;Connect Timeout=30;")]
         public string ConnectionString {
             get {
                 return ((string)(this["ConnectionString"]));

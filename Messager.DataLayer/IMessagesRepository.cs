@@ -9,6 +9,6 @@ namespace Messager.DataLayer
         Message GetMessage(Guid messageId);
         Message CreateMessage(Message message);
         void DeleteMessage(Guid messageId);
-        IReadOnlyList<Message> GetMessagesForUser(Guid chatId, Guid userId);
+        Message[] GetMessagesForUser(Guid chatId, Guid userId);
     }
 }

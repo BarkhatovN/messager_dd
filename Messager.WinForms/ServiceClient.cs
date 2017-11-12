@@ -16,11 +16,30 @@ namespace Messager.WinForms
     {
         private static HttpClient _client;
 
+        static ServiceClient()
+        {
+            Initialize();
+        }
+
+        static string HashSha1(string password)
+        {
+            var sha1 = SHA1.Create();
+            var inputBytes = Encoding.ASCII.GetBytes(password);
+            var hash = sha1.ComputeHash(inputBytes);
+
+            var sb = new StringBuilder();
+            foreach (var t in hash)
+            {
+                sb.Append(t.ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
         public static void Initialize()
         {
             _client = new HttpClient
             {
-                BaseAddress = new Uri(@"http://localhost:12345/api/")
+                BaseAddress = new Uri(@"http://localhost:49890/api/")
             };
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -41,48 +60,57 @@ namespace Messager.WinForms
             return sBuilder.ToString();
         }
 
-        public static async Task<User> RegisterUser(User user)
+        public static User RegisterUser(User user)
         {
-            var response = (await _client.PostAsJsonAsync(@"users/register", user)).Content;
+            user.Password = HashSha1(user.Password);
+            var registeredUser = _client.PostAsJsonAsync(@"users/register", user).Result.Content
+                .ReadAsAsync<User>().Result;
 
-            try
-            {
-                user = response.ReadAsAsync<User>().Result;
-                return user;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
-
-            return new User();
+            return registeredUser;
         }
 
-        public static async Task<User> Authorize(string login, string password)
+        public static User Authorize(string login, string password)
         {
-            return new User();
+            var user = new User { Login = login, Password = HashSha1(password) };
+
+            var authorizedUser = _client.PostAsJsonAsync(@"users/login", user).Result.Content
+                .ReadAsAsync<User>().Result;
+
+            return authorizedUser;
         }
 
-        public static async Task SendMessage(Message message)
+        public static void SendMessage(Message message)
         {
+            _client.PostAsJsonAsync<Message>("messages", message);
+            return;
         }
 
-        public static async Task CreateChat(Chat chat)
+        public static Chat CreateChat(Chat chat)
         {
-            
+            var addedChat = _client.PostAsJsonAsync<Chat>(@"chats", chat).Result.Content.ReadAsAsync<Chat>().Result;
+            return addedChat;
         }
 
-        public static async Task GetMessages(Guid chatId, User user)
+        public static Message[] GetMessages(Guid chatId, Guid userId)
         {
-            
+            var messages = _client.GetAsync($"users/{userId}/chats/{chatId}/messages")
+                .Result.Content.ReadAsAsync<Message[]>().Result;
+            return messages;
         }
 
-        public static async Task<Chat[]> GetChats(string userLogin)
+        public static Chat[] GetChats(Guid userId)
         {
-            return new Chat[1];
+            var chats =  _client.GetAsync($"chats/{userId}").Result.Content.ReadAsAsync<Chat[]>().Result;
+            return chats;
         }
 
-        public static async Task AddChatMember(Chat chat, User user)
+        public static User[] GetUsers()
+        {
+            var users = _client.GetAsync("users/all").Result.Content.ReadAsAsync<User[]>().Result;
+            return users;
+        }
+
+        public static void AddChatMember(Chat chat, User user)
         {
             
         }

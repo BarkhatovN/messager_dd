@@ -17,7 +17,7 @@ namespace Messager.WinForms
         private readonly Size _startSize = new Size(350, 380);
         private readonly Size _workSize = new Size(725, 450);
 
-        private User _user;
+        public User user;
         private LoginControl _loginControl;
         private StartControl _startControl;
         private RegistrationControl _registrationControl;
@@ -67,7 +67,7 @@ namespace Messager.WinForms
         {
             _currentState = States.Working;
 
-            _chatControl = new ChatControl(_user){Location = new Point(0,0)};
+            _chatControl = new ChatControl(user){Location = new Point(0,0)};
             Controls.Add(_chatControl);
 
             _prevState = States.Working;
@@ -97,7 +97,7 @@ namespace Messager.WinForms
         {
             _currentState = States.Registration;
 
-            _registrationControl = new RegistrationControl(_user) { Location = new Point(10, 0) };
+            _registrationControl = new RegistrationControl() { Location = new Point(10, 0) };
             Controls.Add(_registrationControl);
 
             _prevState = States.Registration;

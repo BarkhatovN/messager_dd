@@ -5,6 +5,7 @@ namespace Messager.DataLayer
 {
     public interface IUsersRepository
     {
+        User[] GetUsers();
         User CreateUser(User user);
         User GetUser(Guid userId);
         User GetUser(string login, string password);

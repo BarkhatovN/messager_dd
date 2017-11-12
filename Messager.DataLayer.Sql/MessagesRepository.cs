@@ -115,7 +115,7 @@ namespace Messager.DataLayer.Sql
             }
         }
 
-        public IReadOnlyList<Message> GetMessagesForUser(Guid chatId, Guid userId)
+        public Message[] GetMessagesForUser(Guid chatId, Guid userId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -157,7 +157,6 @@ namespace Messager.DataLayer.Sql
                                 }
                                 prevMessage = message;
                                 prevId = message.Id;
-
                             }
                             else
                             {
@@ -171,7 +170,7 @@ namespace Messager.DataLayer.Sql
 
                         result.FindAll(m => m.IsSelfDestructing && m.User.Id == userId).ForEach(m => DeleteMessage(m.Id));
 
-                        return result.AsReadOnly();
+                        return result.ToArray();
                     }
                 }
             }

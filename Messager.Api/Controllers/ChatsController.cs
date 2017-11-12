@@ -65,12 +65,12 @@ namespace Messager.Api.Controllers
         }
 
         [HttpGet]
-        [Route("api/chats/{id}")]
-        public Chat GetInfo(Guid id)
+        [Route("api/chats/{userId}")]
+        public Chat[] GetUserChatsInfo(Guid userId)
         {
-            var info = _chatsRepository.GetChatInfo(id);
-            _logger.Info($"{DateTime.Now.ToShortDateString()} Chat info with id: {id} has been queried");
-            return info;
+            var chats = _chatsRepository.GetUserChatsInfo(userId);
+            _logger.Info($"{DateTime.Now.ToShortDateString()} Chat info with id: {userId} has been queried");
+            return chats;
         }
 
         [HttpGet]
@@ -82,11 +82,12 @@ namespace Messager.Api.Controllers
         }
 
         [HttpGet]
-        [Route("api/{userId}/chats/{chatId}/messages")]
+        [Route("api/users/{userId}/chats/{chatId}/messages")]
         public Message[] GetMessagesForUser(Guid userId, Guid chatId)
         {
             _logger.Info($"{DateTime.Now.ToShortDateString()} Messages from chat with id: {chatId} for user with id: {userId} has been queried");
-            return _messagesRepository.GetMessagesForUser(chatId, userId).ToArray();
+            var messages = _messagesRepository.GetMessagesForUser(chatId, userId);
+            return (messages != null)? messages : new Message[0] ;
         }
     }
 }

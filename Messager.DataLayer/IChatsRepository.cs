@@ -7,6 +7,7 @@ namespace Messager.DataLayer
     public interface IChatsRepository
     {
         Chat GetChat(Guid id, Guid userId);
+        Chat[] GetUserChatsInfo(Guid userId);
         Chat GetChatInfo(Guid chatId);
         Chat CreateChat(Chat chat);
         IReadOnlyList<User> GetMembers(Guid chatId);

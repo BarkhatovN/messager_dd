@@ -20,6 +20,37 @@ namespace Messager.DataLayer.Sql
             _messagesRepository = new MessagesRepository(connectionString, usersRepository, this);
         }
 
+        public Chat[] GetUserChatsInfo(Guid userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "GetUserChatsInfo";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserId", userId);
+
+                    var chatIds = new List<Guid>();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var chatId = reader.GetGuid(reader.GetOrdinal("ChatId"));
+                            chatIds.Add(chatId);
+                        }
+                    }
+
+                    var chatInfos = new List<Chat>();
+                    foreach (var chatId in chatIds)
+                    {
+                        chatInfos.Add(GetChatInfo(chatId));
+                    }
+                    return chatInfos.ToArray();
+                }
+            }
+        }
+
         public void AddMember(Guid chatId, Guid userId)
         {
             using (var connection = new SqlConnection(_connectionString))
