@@ -88,6 +88,9 @@
     <Compile Include="Controls\MessageControl.Designer.cs">
       <DependentUpon>MessageControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\MessagePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\RegistrationControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

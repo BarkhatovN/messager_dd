@@ -12,5 +12,19 @@ namespace Messager.Model
         public List<Byte[]> Attachments { get; set; }
         public Boolean IsSelfDestructing { get; set; }
         public DateTime Date { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            var message = obj as Message;
+
+            if (message != null)
+                return Id == message.Id;
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Text.GetHashCode();
+        }
     }
 }

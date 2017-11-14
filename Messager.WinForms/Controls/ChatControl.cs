@@ -37,63 +37,26 @@ namespace Messager.WinForms.Controls
             chatUpdaterStart();
         }
 
-        private readonly List<byte[]> photos = new List<byte[]>();
+        private readonly List<byte[]> msgPhotos = new List<byte[]>();
         private readonly User[] _users;
         private readonly User _profile;
         private readonly List<Chat> _chats;
         private Chat _currentChat;
+        List<Message> _messages;
 
-        private void sendBtn_Click(object sender, EventArgs e)
-        {
-            var msg = messageTxt.Text.Trim();
+        // в методах [item]Updater происходит контроль за новыми чатами/сообщениями
+        // при их наличии в них запускается соответсвующий [item]ContainerUpdater
+        // и добавляет информацию в контейнер.
 
-            byte[] GetPhoto(string filename)
-            {
-                var converter = new ImageConverter();
-                var bitmap = new Bitmap(filename);
-                var photo = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
-                return photo;
-            }
-
-            Message message = new Message
-            {
-                Text = msg,
-                User = _profile,
-                Attachments = (photos.Count != 0)
-                    ? photos
-                    : null,
-                Chat = _currentChat,
-                Date = DateTime.UtcNow,
-                IsSelfDestructing = destructingChk.Checked
-            };
-
-            ServiceClient.SendMessage(message);
-            photos.Clear();
-        }
-
-        private void attachBtn_Click(object sender, EventArgs e)
-        {
-            openFileDialog1.Title = "Open Image";
-            openFileDialog1.Filter = "jpg files (*.jpeg)|*.jpg";
-            if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
-                return;
-            var bitmap = new Bitmap(openFileDialog1.FileName);
-            ImageConverter converter = new ImageConverter();
-
-            photos.Add((byte[])converter.ConvertTo(bitmap, typeof(byte[])));
-        }
-
-        private void ChatControl_Load(object sender, EventArgs e)
-        {
-        }
-
-
+        Action messageUpdater;
+        Action chatUpdater;
         Action<Message[], Panel> messageContainerUpdater = (messages, container) =>
         {
-            container.Controls.Clear();
-
             var collection = new List<Control>();
             var k = 0;
+            if (container.Controls.Count > 0)
+                k = container.Controls[container.Controls.Count - 1].Location.Y +
+                    container.Controls[container.Controls.Count - 1].Height;
 
             for (int i = 0; i < messages.Length; i++)
             {
@@ -118,13 +81,53 @@ namespace Messager.WinForms.Controls
                     }
             }
 
-            container.Controls.Clear();
-            container.Controls.AddRange(collection.ToArray());
-            collection.Clear();
-            container.Refresh();
+            if (collection.Count != 0)
+                container.Controls.AddRange(collection.ToArray());
+        };
+        Action<Chat[], Chat, ListBox> chatContainerUpdater = (chats, currentChat, listBox) =>
+        {
+            listBox.Items.AddRange(chats.Select(x => x.Name).ToArray());
         };
 
-        Action messageUpdater;
+        private void addChatBtn_Click(object sender, EventArgs e)
+        {
+            var newChatDialog = new NewChatDialog(_users, _profile);
+            newChatDialog.ShowDialog();
+        }
+
+        private void sendBtn_Click(object sender, EventArgs e)
+        {
+            var msg = messageTxt.Text.Trim();
+
+            Message message = new Message
+            {
+                Text = msg,
+                User = _profile,
+                Attachments = (msgPhotos.Count != 0)
+                    ? msgPhotos
+                    : null,
+                Chat = _currentChat,
+                Date = DateTime.UtcNow,
+                IsSelfDestructing = destructingChk.Checked
+            };
+
+            ServiceClient.SendMessage(message);
+            msgPhotos.Clear();
+        }
+
+        private void attachBtn_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Title = "Open Image";
+            openFileDialog1.Filter = "jpg files (*.jpeg)|*.jpg";
+
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            var bitmap = new Bitmap(openFileDialog1.FileName);
+            ImageConverter converter = new ImageConverter();
+
+            msgPhotos.Add((byte[])converter.ConvertTo(bitmap, typeof(byte[])));
+        }
 
         private void messageUpdaterStart(Guid chatId, Guid userId, Panel msgContainer)
         {
@@ -133,9 +136,13 @@ namespace Messager.WinForms.Controls
                 while (true)
                 {
                     var messages = ServiceClient.GetMessages(chatId, userId);
+                    var newMessages = messages.Where(x=>!_messages.Any(y=>y.Id == x.Id)).ToArray();
+                    _messages.AddRange(newMessages);
 
-                    if (msgContainer.InvokeRequired && msgContainer.IsHandleCreated)
-                        msgContainer.BeginInvoke(messageContainerUpdater, messages.ToArray(), msgContainer);
+                    if (msgContainer.InvokeRequired && msgContainer.IsHandleCreated && newMessages.Length > 0)
+                    {
+                        msgContainer.BeginInvoke(messageContainerUpdater, newMessages, msgContainer);
+                    }
 
                     Thread.Sleep(10000);
                 }
@@ -151,10 +158,12 @@ namespace Messager.WinForms.Controls
                 while (true)
                 {
                     var chats = ServiceClient.GetChats(_profile.Id);
-                    _chats.Clear();
-                    _chats.AddRange(chats);
-                    if (chatList.InvokeRequired && chatList.IsHandleCreated)
-                        chatList.BeginInvoke(chatMembersUpdater, _chats, _currentChat, chatList);
+
+                    var newChats = chats.Where(x => !_chats.Any(y => y.Id == x.Id)).ToArray();
+                    _chats.AddRange(newChats);
+
+                    if (chatList.InvokeRequired && chatList.IsHandleCreated && newChats.Length > 0)
+                        chatList.BeginInvoke(chatContainerUpdater, newChats, _currentChat, chatList);
 
                     Thread.Sleep(10000);
                 }
@@ -163,17 +172,16 @@ namespace Messager.WinForms.Controls
             chatUpdater.BeginInvoke(null, null);
         }
 
-        Action chatUpdater;
+        private void chatList_SelectedItemChanged(object sender, EventArgs e)
+        {
+            if(_chats.Count != 0)
+                _currentChat = _chats.Single(x => x.Name == chatList.SelectedItem.ToString());
 
-        Action<List<Chat>,Chat, ListBox> chatMembersUpdater = (chats, currentChat, listBox) =>
-         {
-             listBox.Items.Clear();
-             listBox.Items.AddRange(chats.Select(x => x.Name).ToArray());
-             if(currentChat != null)
-                listBox.SetSelected(listBox.Items.IndexOf(currentChat.Name), listBox.Items.Contains(currentChat.Name));
-             listBox.Refresh();
-         };
-        private static int k;
+            msgPnl.Controls.Clear();
+            msgPnl.Update();
+            _messages = new List<Message>();
+            messageUpdaterStart(_currentChat.Id, _profile.Id, msgPnl);
+        }
 
         public static Image ResizeImage(Image image, int width, int height)
         {
@@ -198,21 +206,6 @@ namespace Messager.WinForms.Controls
             }
 
             return destImage;
-        }
-
-        private void addChatBtn_Click(object sender, EventArgs e)
-        {
-            var newChatDialog = new NewChatDialog(_users, _profile);
-            newChatDialog.ShowDialog();
-
-        }
-
-        private void chatList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if(_chats.Count != 0)
-                _currentChat = _chats.Single(x => x.Name == chatList.SelectedItem.ToString());
-
-            messageUpdaterStart(_currentChat.Id, _profile.Id, msgPnl);
         }
     }
 }

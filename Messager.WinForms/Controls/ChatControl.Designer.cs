@@ -38,7 +38,7 @@
             this.addChatBtn = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.profilePhotoPB = new System.Windows.Forms.PictureBox();
-            this.msgPnl = new System.Windows.Forms.Panel();
+            this.msgPnl = new MessagePanel();
             this.sendMessagePnl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.profilePhotoPB)).BeginInit();
             this.SuspendLayout();
@@ -66,7 +66,7 @@
             this.chatList.Name = "chatList";
             this.chatList.Size = new System.Drawing.Size(178, 140);
             this.chatList.TabIndex = 2;
-            this.chatList.SelectedIndexChanged += new System.EventHandler(this.chatList_SelectedIndexChanged);
+            this.chatList.SelectedValueChanged += new System.EventHandler(this.chatList_SelectedItemChanged);
             // 
             // sendBtn
             // 
